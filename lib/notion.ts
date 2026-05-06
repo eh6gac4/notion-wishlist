@@ -46,66 +46,45 @@ function isFullPage(page: unknown): page is PageObjectResponse {
   );
 }
 
-function readTitle(prop: unknown): string {
-  if (!prop || typeof prop !== "object") return "";
-  const p = prop as { type?: string; title?: Array<{ plain_text: string }> };
-  if (p.type !== "title" || !p.title) return "";
-  return p.title.map((t) => t.plain_text).join("");
-}
-
-function readUrl(prop: unknown): string | null {
-  if (!prop || typeof prop !== "object") return null;
-  const p = prop as { type?: string; url?: string | null };
-  if (p.type !== "url") return null;
-  return p.url ?? null;
-}
-
-function readNumber(prop: unknown): number | null {
-  if (!prop || typeof prop !== "object") return null;
-  const p = prop as { type?: string; number?: number | null };
-  if (p.type !== "number") return null;
-  return p.number ?? null;
-}
-
-function readSelect(prop: unknown): string | null {
-  if (!prop || typeof prop !== "object") return null;
-  const p = prop as {
-    type?: string;
-    select?: { name: string } | null;
-  };
-  if (p.type !== "select") return null;
-  return p.select?.name ?? null;
-}
-
-function readDateStart(prop: unknown): string | null {
-  if (!prop || typeof prop !== "object") return null;
-  const p = prop as {
-    type?: string;
-    date?: { start: string; end: string | null } | null;
-  };
-  if (p.type !== "date") return null;
-  return p.date?.start ?? null;
-}
+type Property = PageObjectResponse["properties"][string];
 
 export function pageToItem(page: PageObjectResponse): WishItem {
-  const props = page.properties;
+  const p = page.properties;
   return {
     id: page.id,
-    name: readTitle(props[PROPS.name]) || "(無題)",
-    url: readUrl(props[PROPS.url]),
-    price: readNumber(props[PROPS.price]),
-    status: (readSelect(props[PROPS.status]) as WishItem["status"]) ?? null,
-    priority:
-      (readSelect(props[PROPS.priority]) as WishItem["priority"]) ?? null,
-    purchaseDate: readDateStart(props[PROPS.purchaseDate]),
+    name: readTitle(p[PROPS.name]) || "(無題)",
+    url: readUrl(p[PROPS.url]),
+    price: readNumber(p[PROPS.price]),
+    status: readSelect(p[PROPS.status]) as WishItem["status"],
+    priority: readSelect(p[PROPS.priority]) as WishItem["priority"],
+    purchaseDate: readDateStart(p[PROPS.purchaseDate]),
     createdAt: page.created_time,
     updatedAt: page.last_edited_time,
   };
 }
 
-type PropertyValue = NonNullable<
-  CreatePageParameters["properties"]
->[string];
+function readTitle(prop: Property | undefined): string {
+  if (prop?.type !== "title") return "";
+  return prop.title.map((t) => t.plain_text).join("");
+}
+
+function readUrl(prop: Property | undefined): string | null {
+  return prop?.type === "url" ? prop.url ?? null : null;
+}
+
+function readNumber(prop: Property | undefined): number | null {
+  return prop?.type === "number" ? prop.number ?? null : null;
+}
+
+function readSelect(prop: Property | undefined): string | null {
+  return prop?.type === "select" ? prop.select?.name ?? null : null;
+}
+
+function readDateStart(prop: Property | undefined): string | null {
+  return prop?.type === "date" ? prop.date?.start ?? null : null;
+}
+
+type PropertyValue = NonNullable<CreatePageParameters["properties"]>[string];
 
 function buildProperties(
   input: WishItemPatch
@@ -150,6 +129,7 @@ export async function listItems(): Promise<WishItem[]> {
       database_id: getDatabaseId(),
       start_cursor: cursor,
       page_size: 100,
+      sorts: [{ timestamp: "last_edited_time", direction: "descending" }],
     });
     for (const page of res.results) {
       if (isFullPage(page)) {

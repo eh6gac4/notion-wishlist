@@ -12,11 +12,13 @@ import {
   archiveItemMock,
 } from "./mock";
 
+const TRUTHY = new Set(["1", "true"]);
+const FALSY = new Set(["0", "false"]);
+
 export function isMockMode(): boolean {
-  if (process.env.USE_MOCK_DATA === "1") return true;
-  if (process.env.USE_MOCK_DATA === "true") return true;
-  if (process.env.USE_MOCK_DATA === "0") return false;
-  if (process.env.USE_MOCK_DATA === "false") return false;
+  const flag = process.env.USE_MOCK_DATA;
+  if (flag && TRUTHY.has(flag)) return true;
+  if (flag && FALSY.has(flag)) return false;
   return !process.env.NOTION_TOKEN || !process.env.NOTION_DATABASE_ID;
 }
 

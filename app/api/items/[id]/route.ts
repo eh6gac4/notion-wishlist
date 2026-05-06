@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { archiveItem, updateItem } from "@/lib/store";
+import { errorMessage } from "@/lib/api";
 import type { WishItemPatch } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -19,10 +20,7 @@ export async function PATCH(
     const item = await updateItem(id, body);
     return NextResponse.json({ item });
   } catch (e) {
-    return NextResponse.json(
-      { error: errorMessage(e) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage(e) }, { status: 500 });
   }
 }
 
@@ -35,14 +33,6 @@ export async function DELETE(
     await archiveItem(id);
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json(
-      { error: errorMessage(e) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage(e) }, { status: 500 });
   }
-}
-
-function errorMessage(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  return "unknown error";
 }

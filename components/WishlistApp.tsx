@@ -7,12 +7,11 @@ import type {
   WishItemPatch,
   WishStatus,
 } from "@/lib/types";
+import { PRIORITIES, TERMINAL_STATUSES } from "@/lib/types";
 import { Toolbar } from "./Toolbar";
 import type { StatusFilter, SortKey } from "./Toolbar";
 import { ListView } from "./ListView";
-import { AddItemForm } from "./AddItemForm";
-
-const PRIORITY_ORDER: Record<string, number> = { 高: 0, 中: 1, 低: 2 };
+import { AddItemForm, type AddState } from "./AddItemForm";
 
 export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
   const [items, setItems] = useState<WishItem[]>(initialItems);
@@ -21,10 +20,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
   const [query, setQuery] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [addOpen, setAddOpen] = useState(false);
-  const [addInitialStatus, setAddInitialStatus] = useState<
-    WishStatus | undefined
-  >(undefined);
+  const [addState, setAddState] = useState<AddState>(null);
 
   const groupByStatus = statusFilter === "all" || statusFilter === "active";
 
@@ -32,7 +28,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
     let arr = items.slice();
     if (statusFilter === "active") {
       arr = arr.filter(
-        (it) => it.status !== "購入済み" && it.status !== "却下"
+        (it) => !it.status || !TERMINAL_STATUSES.includes(it.status)
       );
     } else if (statusFilter !== "all") {
       arr = arr.filter((it) => it.status === statusFilter);
@@ -44,8 +40,8 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
     arr.sort((a, b) => {
       switch (sort) {
         case "priority": {
-          const pa = PRIORITY_ORDER[a.priority ?? ""] ?? 99;
-          const pb = PRIORITY_ORDER[b.priority ?? ""] ?? 99;
+          const pa = priorityIndex(a.priority);
+          const pb = priorityIndex(b.priority);
           if (pa !== pb) return pa - pb;
           return b.updatedAt.localeCompare(a.updatedAt);
         }
@@ -100,12 +96,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "更新に失敗しました");
       setItems(prev);
-      return;
     }
-    const data = await res.json();
-    setItems((curr) =>
-      curr.map((it) => (it.id === id ? (data.item as WishItem) : it))
-    );
   }
 
   async function handleDelete(id: string) {
@@ -132,10 +123,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
         onQueryChange={setQuery}
         count={visible.length}
         totalPrice={totalPrice}
-        onAddClick={() => {
-          setAddInitialStatus(undefined);
-          setAddOpen(true);
-        }}
+        onAddClick={() => setAddState("default")}
       />
 
       {error && (
@@ -145,9 +133,8 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
       )}
 
       <AddItemForm
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        initialStatus={addInitialStatus}
+        addState={addState}
+        onClose={() => setAddState(null)}
         pending={pending}
         onSubmit={(input) =>
           new Promise<boolean>((resolve) => {
@@ -163,11 +150,14 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
         groupByStatus={groupByStatus}
         onPatch={handlePatch}
         onDelete={handleDelete}
-        onAddInStatus={(s) => {
-          setAddInitialStatus(s);
-          setAddOpen(true);
-        }}
+        onAddInStatus={(s) => setAddState(s)}
       />
     </div>
   );
+}
+
+function priorityIndex(p: WishItem["priority"]): number {
+  if (!p) return 99;
+  const i = PRIORITIES.indexOf(p);
+  return i === -1 ? 99 : i;
 }

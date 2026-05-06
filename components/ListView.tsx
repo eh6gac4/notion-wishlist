@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import type {
-  WishItem,
-  WishItemPatch,
-  WishStatus,
-} from "@/lib/types";
-import { STATUSES } from "@/lib/types";
+import { useMemo, useState } from "react";
+import type { WishItem, WishItemPatch, WishStatus } from "@/lib/types";
+import { STATUSES, TERMINAL_STATUSES } from "@/lib/types";
 import { PriorityText, StatusDot } from "./Pill";
 import { StatusMenu } from "./StatusMenu";
+import { Field, inputClsCompact } from "./Field";
 
 export function ListView({
   items,
@@ -23,41 +20,44 @@ export function ListView({
   onAddInStatus: (status: WishStatus) => void;
   groupByStatus: boolean;
 }) {
-  if (!groupByStatus) {
+  const sections = useMemo(() => {
+    if (!groupByStatus) return null;
+    const groups = new Map<WishStatus | "未設定", WishItem[]>();
+    for (const s of STATUSES) groups.set(s, []);
+    groups.set("未設定", []);
+    for (const it of items) {
+      const key = (it.status ?? "未設定") as WishStatus | "未設定";
+      groups.get(key)!.push(it);
+    }
+    const result: Array<{
+      key: WishStatus | "未設定";
+      items: WishItem[];
+      showAdd: boolean;
+    }> = STATUSES.map((s) => ({ key: s, items: groups.get(s)!, showAdd: true }));
+    const noStatus = groups.get("未設定")!;
+    if (noStatus.length > 0) {
+      result.push({ key: "未設定", items: noStatus, showAdd: false });
+    }
+    return result;
+  }, [items, groupByStatus]);
+
+  if (!sections) {
     return (
       <div>
-        {items.length === 0 ? <Empty /> : items.map((it) => (
-          <Row
-            key={it.id}
-            item={it}
-            onPatch={(p) => onPatch(it.id, p)}
-            onDelete={() => onDelete(it.id)}
-          />
-        ))}
+        {items.length === 0 ? (
+          <Empty />
+        ) : (
+          items.map((it) => (
+            <Row
+              key={it.id}
+              item={it}
+              onPatch={(p) => onPatch(it.id, p)}
+              onDelete={() => onDelete(it.id)}
+            />
+          ))
+        )}
       </div>
     );
-  }
-
-  const groups = new Map<WishStatus | "未設定", WishItem[]>();
-  for (const s of STATUSES) groups.set(s, []);
-  groups.set("未設定", []);
-  for (const it of items) {
-    const key = (it.status ?? "未設定") as WishStatus | "未設定";
-    groups.get(key)!.push(it);
-  }
-
-  const sections: Array<{
-    key: WishStatus | "未設定";
-    items: WishItem[];
-    showAdd: boolean;
-  }> = STATUSES.map((s) => ({
-    key: s,
-    items: groups.get(s)!,
-    showAdd: true,
-  }));
-  const noStatus = groups.get("未設定")!;
-  if (noStatus.length > 0) {
-    sections.push({ key: "未設定", items: noStatus, showAdd: false });
   }
 
   return (
@@ -92,7 +92,7 @@ function Section({
   onAdd?: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(
-    title === "購入済み" || title === "却下"
+    title !== "未設定" && TERMINAL_STATUSES.includes(title)
   );
   return (
     <section>
@@ -245,7 +245,7 @@ function EditPanel({
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className={inputCls}
+          className={inputClsCompact}
         />
       </Field>
       <Field label="URL" className="sm:col-span-2">
@@ -253,7 +253,7 @@ function EditPanel({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://..."
-          className={inputCls}
+          className={inputClsCompact}
         />
       </Field>
       <Field label="価格">
@@ -261,7 +261,7 @@ function EditPanel({
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          className={inputCls}
+          className={inputClsCompact}
         />
       </Field>
       <Field label="購入予定日">
@@ -269,7 +269,7 @@ function EditPanel({
           type="date"
           value={purchaseDate}
           onChange={(e) => setPurchaseDate(e.target.value)}
-          className={inputCls}
+          className={inputClsCompact}
         />
       </Field>
       <div className="flex items-center justify-between sm:col-span-2">
@@ -306,23 +306,6 @@ function EditPanel({
         </div>
       </div>
     </div>
-  );
-}
-
-function Field({
-  label,
-  className,
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-1 text-[11.5px] ${className ?? ""}`}>
-      <span className="text-neutral-500 dark:text-neutral-400">{label}</span>
-      {children}
-    </label>
   );
 }
 
@@ -366,13 +349,14 @@ function PencilIcon() {
   );
 }
 
-const inputCls =
-  "rounded border border-[var(--notion-border-strong)] bg-white px-2 py-1 text-[12.5px] outline-none focus:border-neutral-400 dark:bg-[#252525] dark:focus:border-neutral-500";
+const dateFormatter = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(
-    d.getDate()
-  ).padStart(2, "0")}`;
+  return dateFormatter.format(d);
 }

@@ -31,3 +31,9 @@ export const STATUSES: WishStatus[] = [
   "却下",
 ];
 export const PRIORITIES: WishPriority[] = ["高", "中", "低"];
+
+// 「アクティブでない」ステータス。アクティブフィルタ・セクション初期折りたたみで使う。
+export const TERMINAL_STATUSES: readonly WishStatus[] = ["購入済み", "却下"];
+
+export const DEFAULT_STATUS: WishStatus = "検討中";
+export const DEFAULT_PRIORITY: WishPriority = "中";

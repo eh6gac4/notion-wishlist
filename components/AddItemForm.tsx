@@ -2,42 +2,48 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { WishItemInput, WishStatus, WishPriority } from "@/lib/types";
-import { STATUSES, PRIORITIES } from "@/lib/types";
+import {
+  STATUSES,
+  PRIORITIES,
+  DEFAULT_STATUS,
+  DEFAULT_PRIORITY,
+} from "@/lib/types";
+import { Field, inputCls } from "./Field";
+
+export type AddState = WishStatus | "default" | null;
 
 export function AddItemForm({
-  open,
+  addState,
   onClose,
   onSubmit,
   pending,
-  initialStatus,
 }: {
-  open: boolean;
+  addState: AddState;
   onClose: () => void;
   onSubmit: (input: WishItemInput) => Promise<boolean>;
   pending: boolean;
-  initialStatus?: WishStatus;
 }) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [price, setPrice] = useState("");
-  const [status, setStatus] = useState<WishStatus>("検討中");
-  const [priority, setPriority] = useState<WishPriority>("中");
+  const [status, setStatus] = useState<WishStatus>(DEFAULT_STATUS);
+  const [priority, setPriority] = useState<WishPriority>(DEFAULT_PRIORITY);
   const [purchaseDate, setPurchaseDate] = useState("");
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (open) {
-      setStatus(initialStatus ?? "検討中");
-      setTimeout(() => nameRef.current?.focus(), 10);
-    }
-  }, [open, initialStatus]);
+    if (addState === null) return;
+    setStatus(addState === "default" ? DEFAULT_STATUS : addState);
+    const t = setTimeout(() => nameRef.current?.focus(), 10);
+    return () => clearTimeout(t);
+  }, [addState]);
 
   function reset() {
     setName("");
     setUrl("");
     setPrice("");
-    setStatus(initialStatus ?? "検討中");
-    setPriority("中");
+    setStatus(DEFAULT_STATUS);
+    setPriority(DEFAULT_PRIORITY);
     setPurchaseDate("");
   }
 
@@ -58,7 +64,7 @@ export function AddItemForm({
     }
   }
 
-  if (!open) return null;
+  if (addState === null) return null;
 
   return (
     <form
@@ -151,23 +157,3 @@ export function AddItemForm({
     </form>
   );
 }
-
-function Field({
-  label,
-  className,
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`flex flex-col gap-1 text-[11.5px] ${className ?? ""}`}>
-      <span className="text-neutral-500 dark:text-neutral-400">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-const inputCls =
-  "rounded border border-[var(--notion-border-strong)] bg-white px-2 py-1.5 text-[13px] outline-none focus:border-neutral-400 dark:bg-[#252525] dark:focus:border-neutral-500";
