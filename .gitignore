@@ -21,3 +21,9 @@ test-results
 .wrangler
 .dev.vars
 worker-configuration.d.ts
+
+# serwist (build 生成物。public/icon-* は ignore しない)
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+public/workbox-*.js
