@@ -3,16 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { WishStatus } from "@/lib/types";
 import { STATUSES } from "@/lib/types";
-import { StatusDot, StatusPill } from "./Pill";
+import { StatusDot } from "./Pill";
 
 export function StatusMenu({
   value,
   onChange,
-  compact = false,
 }: {
   value: WishStatus | null;
   onChange: (next: WishStatus | null) => void;
-  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -39,15 +37,13 @@ export function StatusMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex items-center justify-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5 ${
-          compact ? "h-7 w-7" : "px-2 py-1"
-        }`}
+        className="inline-flex h-7 w-7 items-center justify-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={compact ? `ステータス: ${label}` : undefined}
-        title={compact ? label : undefined}
+        aria-label={`ステータス: ${label}`}
+        title={label}
       >
-        {compact ? <StatusDot status={value} /> : <StatusPill status={value} />}
+        <StatusDot status={value} />
       </button>
       {open && (
         <div

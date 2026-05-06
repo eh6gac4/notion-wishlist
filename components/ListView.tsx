@@ -142,7 +142,6 @@ function Section({
               <Row
                 key={it.id}
                 item={it}
-                compact
                 onPatch={(p) => onPatch(it.id, p)}
                 onDelete={() => onDelete(it.id)}
               />
@@ -165,12 +164,10 @@ function Section({
 
 function Row({
   item,
-  compact = false,
   onPatch,
   onDelete,
 }: {
   item: WishItem;
-  compact?: boolean;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
 }) {
@@ -183,7 +180,6 @@ function Row({
         <StatusMenu
           value={item.status}
           onChange={(next) => onPatch({ status: next })}
-          compact={compact}
         />
         <button
           type="button"
