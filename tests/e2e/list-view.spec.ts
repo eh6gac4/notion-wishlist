@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("ListView - グルーピング時のコンパクトステータス", () => {
+test.describe("ListView - 全フィルタでアイコンボタン表示", () => {
   test("行頭のステータスは色ドット（aria-label='ステータス: ...'）で表示される", async ({
     page,
   }) => {
@@ -9,7 +9,7 @@ test.describe("ListView - グルーピング時のコンパクトステータス
     await expect(
       page.getByText("BenQ ScreenBar Halo モニターライト")
     ).toBeVisible();
-    // compact 時のみ aria-label が "ステータス: ..." 形式で付くので、
+    // aria-label は常に "ステータス: ..." 形式で付くので、
     // この名前で見つかるボタンは Row 内のステータスドットだけになる
     await expect(
       page
@@ -34,16 +34,17 @@ test.describe("ListView - グルーピング時のコンパクトステータス
     await expect(menu).toBeHidden();
   });
 
-  test("特定ステータスでフィルタするとコンパクト表示が解除され通常の Pill になる", async ({
+  test("特定ステータスでフィルタしてもアイコンボタン表示が維持される", async ({
     page,
   }) => {
     await page.goto("/");
     await page.locator("select").first().selectOption("検討中");
-    // 非グルーピング状態では aria-label="ステータス: ..." は付かない
+    // 行頭のステータスボタンはアイコンのみ（aria-label="ステータス: 検討中"）
     await expect(
-      page.getByRole("button", { name: /^ステータス: /, exact: false })
-    ).toHaveCount(0);
-    // 行内 StatusPill のテキストとして "検討中" が表示される
+      page
+        .getByRole("button", { name: "ステータス: 検討中", exact: true })
+        .first()
+    ).toBeVisible();
     await expect(
       page.getByText("BenQ ScreenBar Halo モニターライト")
     ).toBeVisible();

@@ -13,12 +13,14 @@ export function ListView({
   onDelete,
   onAddInStatus,
   groupByStatus,
+  hideTerminalSections = false,
 }: {
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
   onAddInStatus: (status: WishStatus) => void;
   groupByStatus: boolean;
+  hideTerminalSections?: boolean;
 }) {
   const sections = useMemo(() => {
     if (!groupByStatus) return null;
@@ -29,17 +31,24 @@ export function ListView({
       const key = (it.status ?? "未設定") as WishStatus | "未設定";
       groups.get(key)!.push(it);
     }
+    const visibleStatuses = hideTerminalSections
+      ? STATUSES.filter((s) => !TERMINAL_STATUSES.includes(s))
+      : STATUSES;
     const result: Array<{
       key: WishStatus | "未設定";
       items: WishItem[];
       showAdd: boolean;
-    }> = STATUSES.map((s) => ({ key: s, items: groups.get(s)!, showAdd: true }));
+    }> = visibleStatuses.map((s) => ({
+      key: s,
+      items: groups.get(s)!,
+      showAdd: true,
+    }));
     const noStatus = groups.get("未設定")!;
     if (noStatus.length > 0) {
       result.push({ key: "未設定", items: noStatus, showAdd: false });
     }
     return result;
-  }, [items, groupByStatus]);
+  }, [items, groupByStatus, hideTerminalSections]);
 
   if (!sections) {
     return (
@@ -133,7 +142,6 @@ function Section({
               <Row
                 key={it.id}
                 item={it}
-                compact
                 onPatch={(p) => onPatch(it.id, p)}
                 onDelete={() => onDelete(it.id)}
               />
@@ -156,12 +164,10 @@ function Section({
 
 function Row({
   item,
-  compact = false,
   onPatch,
   onDelete,
 }: {
   item: WishItem;
-  compact?: boolean;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
 }) {
@@ -174,7 +180,6 @@ function Row({
         <StatusMenu
           value={item.status}
           onChange={(next) => onPatch({ status: next })}
-          compact={compact}
         />
         <button
           type="button"
