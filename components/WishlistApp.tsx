@@ -151,6 +151,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
       <ListView
         items={visible}
         groupByStatus={groupByStatus}
+        hideTerminalSections={statusFilter === "active"}
         onPatch={handlePatch}
         onDelete={handleDelete}
         onAddInStatus={(s) => setAddState(s)}
