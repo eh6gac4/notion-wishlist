@@ -5,7 +5,7 @@ import type { WishItem, WishItemPatch, WishStatus } from "@/lib/types";
 import { STATUSES, TERMINAL_STATUSES } from "@/lib/types";
 import { PriorityText, StatusDot } from "./Pill";
 import { StatusMenu } from "./StatusMenu";
-import { Field, inputClsCompact } from "./Field";
+import { ItemDetailDialog } from "./ItemDetailDialog";
 
 export function ListView({
   items,
@@ -165,154 +165,68 @@ function Row({
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
 }) {
-  const [editing, setEditing] = useState(false);
+  const [open, setOpen] = useState(false);
+  const hasMeta =
+    item.priority || item.purchaseDate || item.price !== null;
   return (
     <div className="group border-b border-[var(--notion-border)]">
-      <div className="flex flex-col gap-0.5 px-3 py-2 hover:bg-neutral-50/70 dark:hover:bg-white/[0.03]">
-        <div className="flex items-center gap-3">
-          <StatusMenu
-            value={item.status}
-            onChange={(next) => onPatch({ status: next })}
-            compact={compact}
-          />
+      <div className="flex items-center gap-1 px-3 py-2 hover:bg-neutral-50/70 dark:hover:bg-white/[0.03]">
+        <StatusMenu
+          value={item.status}
+          onChange={(next) => onPatch({ status: next })}
+          compact={compact}
+        />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded px-1.5 py-1 text-left hover:bg-neutral-100/60 dark:hover:bg-white/5"
+          title={item.name}
+          aria-label={`${item.name} の詳細を開く`}
+        >
+          <span className="break-words text-[13.5px] text-neutral-900 dark:text-neutral-100">
+            {item.name}
+          </span>
+          {hasMeta && (
+            <div className="flex items-center gap-3 text-[12px] text-neutral-500 dark:text-neutral-400">
+              {item.priority && <PriorityText priority={item.priority} />}
+              {item.purchaseDate && (
+                <span>{formatDate(item.purchaseDate)}</span>
+              )}
+              {item.price !== null && (
+                <span className="tabular-nums">
+                  ¥{item.price.toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
+        </button>
+        {item.url && (
           <a
-            href={item.url ?? undefined}
+            href={item.url}
             target="_blank"
             rel="noreferrer"
-            className={`min-w-0 flex-1 break-words text-[13.5px] ${
-              item.url
-                ? "text-neutral-900 hover:underline dark:text-neutral-100"
-                : "pointer-events-none text-neutral-900 dark:text-neutral-100"
-            }`}
-            title={item.name}
+            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
+            aria-label="リンクを開く"
+            title="リンクを開く"
           >
-            {item.name}
+            <ExternalLinkIcon />
           </a>
-          <button
-            type="button"
-            onClick={() => setEditing((v) => !v)}
-            className="rounded p-1 text-neutral-400 opacity-0 transition group-hover:opacity-100 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
-            aria-label={editing ? "閉じる" : "編集"}
-            title={editing ? "閉じる" : "編集"}
-          >
-            <PencilIcon />
-          </button>
-        </div>
-        {(item.priority || item.purchaseDate || item.price !== null) && (
-          <div className="flex items-center gap-3 pl-2 text-[12px] text-neutral-500 dark:text-neutral-400">
-            {item.priority && <PriorityText priority={item.priority} />}
-            {item.purchaseDate && (
-              <span>{formatDate(item.purchaseDate)}</span>
-            )}
-            {item.price !== null && (
-              <span className="tabular-nums">¥{item.price.toLocaleString()}</span>
-            )}
-          </div>
         )}
       </div>
-      {editing && (
-        <EditPanel
+      {open && (
+        <ItemDetailDialog
           item={item}
           onPatch={(p) => {
             onPatch(p);
-            setEditing(false);
+            setOpen(false);
           }}
           onDelete={() => {
             onDelete();
-            setEditing(false);
+            setOpen(false);
           }}
-          onClose={() => setEditing(false)}
+          onClose={() => setOpen(false)}
         />
       )}
-    </div>
-  );
-}
-
-function EditPanel({
-  item,
-  onPatch,
-  onDelete,
-  onClose,
-}: {
-  item: WishItem;
-  onPatch: (patch: WishItemPatch) => void;
-  onDelete: () => void;
-  onClose: () => void;
-}) {
-  const [name, setName] = useState(item.name);
-  const [url, setUrl] = useState(item.url ?? "");
-  const [price, setPrice] = useState(
-    item.price !== null ? String(item.price) : ""
-  );
-  const [purchaseDate, setPurchaseDate] = useState(
-    item.purchaseDate ? item.purchaseDate.slice(0, 10) : ""
-  );
-  return (
-    <div className="grid grid-cols-1 gap-2 bg-neutral-50/60 px-3 py-3 sm:grid-cols-2 dark:bg-white/[0.02]">
-      <Field label="品名" className="sm:col-span-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={inputClsCompact}
-        />
-      </Field>
-      <Field label="URL" className="sm:col-span-2">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://..."
-          className={inputClsCompact}
-        />
-      </Field>
-      <Field label="価格">
-        <input
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className={inputClsCompact}
-        />
-      </Field>
-      <Field label="購入予定日">
-        <input
-          type="date"
-          value={purchaseDate}
-          onChange={(e) => setPurchaseDate(e.target.value)}
-          className={inputClsCompact}
-        />
-      </Field>
-      <div className="flex items-center justify-between sm:col-span-2">
-        <button
-          type="button"
-          onClick={onDelete}
-          className="rounded px-2 py-1 text-[12px] text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
-        >
-          削除
-        </button>
-        <div className="flex gap-1.5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded px-2 py-1 text-[12px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
-          >
-            キャンセル
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              onPatch({
-                name: name.trim(),
-                url: url.trim() || null,
-                price: price ? Number(price) : null,
-                purchaseDate: purchaseDate || null,
-              })
-            }
-            disabled={!name.trim()}
-            className="rounded bg-neutral-900 px-2.5 py-1 text-[12px] font-medium text-white hover:bg-neutral-700 disabled:opacity-50 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            保存
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -349,10 +263,11 @@ function PlusIcon() {
   );
 }
 
-function PencilIcon() {
+function ExternalLinkIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.082-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064L11.189 6.25Zm2.183-1.675a.25.25 0 0 0 0-.354l-1.086-1.086a.25.25 0 0 0-.354 0L10.811 3.75 12.25 5.189l1.122-1.114Z" />
+      <path d="M9 2.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0V4.56l-4.72 4.72a.75.75 0 1 1-1.06-1.06L11.44 3.5H9.75A.75.75 0 0 1 9 2.75Z" />
+      <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v7.5C2 13.216 2.784 14 3.75 14h7.5A1.75 1.75 0 0 0 13 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-7.5a.25.25 0 0 1-.25-.25v-7.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5Z" />
     </svg>
   );
 }
