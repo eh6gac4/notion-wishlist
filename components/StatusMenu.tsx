@@ -39,8 +39,8 @@ export function StatusMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex items-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5 ${
-          compact ? "p-1" : "px-1.5 py-0.5"
+        className={`inline-flex items-center justify-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5 ${
+          compact ? "h-7 w-7" : "px-2 py-1"
         }`}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -63,7 +63,7 @@ export function StatusMenu({
                 onChange(s);
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-[13px] hover:bg-neutral-100 dark:hover:bg-white/5"
+              className="flex w-full items-center gap-2 rounded px-2.5 py-2 text-left text-[13px] hover:bg-neutral-100 dark:hover:bg-white/5"
             >
               <StatusDot status={s} />
               {s}
@@ -77,7 +77,7 @@ export function StatusMenu({
               onChange(null);
               setOpen(false);
             }}
-            className="flex w-full items-center rounded px-2 py-1.5 text-left text-[12px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
+            className="flex w-full items-center rounded px-2.5 py-2 text-left text-[12px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
           >
             未設定
           </button>
