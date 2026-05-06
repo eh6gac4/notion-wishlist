@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = process.env.PORT ?? "3500";
+const PORT = process.env.PORT ?? "3004";
 const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -20,7 +20,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `USE_MOCK_DATA=1 PORT=${PORT} npm run dev`,
+    command: `USE_MOCK_DATA=1 npm run dev`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
