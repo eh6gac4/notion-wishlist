@@ -2,8 +2,11 @@
 
 Notion のデータベース「🛒 Wishlist」を Web 上で閲覧・編集するためのツール。
 
+本番: <https://wish.eh6gac4.work>（要ログイン）
+
 - フロントエンド: Next.js 15 (App Router) + React 19 + Tailwind CSS
 - バックエンド: Next.js Route Handlers が Notion API を仲介（トークンはサーバー側のみ）
+- 認証: NextAuth.js v5 (Credentials)
 - データの正本（Source of Truth）は Notion DB
 
 ## 想定する Notion DB のスキーマ

@@ -12,6 +12,9 @@
   "observability": {
     "enabled": true
   },
+  "routes": [
+    { "pattern": "wish.eh6gac4.work", "custom_domain": true }
+  ],
   "vars": {
     "NOTION_DATABASE_ID": "31a1690d811d45f7895dfe9ff0adf29b",
     "USE_MOCK_DATA": "0"
