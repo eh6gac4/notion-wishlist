@@ -48,7 +48,7 @@ npm install
 npm run dev
 ```
 
-ブラウザで <http://localhost:3000> を開きます。
+ブラウザで <http://localhost:3004> を開きます。
 
 ## ダミーデータモード
 
