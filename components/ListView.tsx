@@ -133,6 +133,7 @@ function Section({
               <Row
                 key={it.id}
                 item={it}
+                compact
                 onPatch={(p) => onPatch(it.id, p)}
                 onDelete={() => onDelete(it.id)}
               />
@@ -155,52 +156,59 @@ function Section({
 
 function Row({
   item,
+  compact = false,
   onPatch,
   onDelete,
 }: {
   item: WishItem;
+  compact?: boolean;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   return (
     <div className="group border-b border-[var(--notion-border)]">
-      <div className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-50/70 dark:hover:bg-white/[0.03]">
-        <StatusMenu
-          value={item.status}
-          onChange={(next) => onPatch({ status: next })}
-        />
-        <a
-          href={item.url ?? undefined}
-          target="_blank"
-          rel="noreferrer"
-          className={`min-w-0 flex-1 truncate text-[13.5px] ${
-            item.url
-              ? "text-neutral-900 hover:underline dark:text-neutral-100"
-              : "pointer-events-none text-neutral-900 dark:text-neutral-100"
-          }`}
-          title={item.name}
-        >
-          {item.name}
-        </a>
-        <PriorityText priority={item.priority} className="w-6 text-center" />
-        {item.purchaseDate && (
-          <span className="hidden w-24 text-right text-[12px] text-neutral-500 sm:inline-block dark:text-neutral-400">
-            {formatDate(item.purchaseDate)}
-          </span>
+      <div className="flex flex-col gap-0.5 px-3 py-2 hover:bg-neutral-50/70 dark:hover:bg-white/[0.03]">
+        <div className="flex items-center gap-3">
+          <StatusMenu
+            value={item.status}
+            onChange={(next) => onPatch({ status: next })}
+            compact={compact}
+          />
+          <a
+            href={item.url ?? undefined}
+            target="_blank"
+            rel="noreferrer"
+            className={`min-w-0 flex-1 break-words text-[13.5px] ${
+              item.url
+                ? "text-neutral-900 hover:underline dark:text-neutral-100"
+                : "pointer-events-none text-neutral-900 dark:text-neutral-100"
+            }`}
+            title={item.name}
+          >
+            {item.name}
+          </a>
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="rounded p-1 text-neutral-400 opacity-0 transition group-hover:opacity-100 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
+            aria-label={editing ? "閉じる" : "編集"}
+            title={editing ? "閉じる" : "編集"}
+          >
+            <PencilIcon />
+          </button>
+        </div>
+        {(item.priority || item.purchaseDate || item.price !== null) && (
+          <div className="flex items-center gap-3 pl-2 text-[12px] text-neutral-500 dark:text-neutral-400">
+            {item.priority && <PriorityText priority={item.priority} />}
+            {item.purchaseDate && (
+              <span>{formatDate(item.purchaseDate)}</span>
+            )}
+            {item.price !== null && (
+              <span className="tabular-nums">¥{item.price.toLocaleString()}</span>
+            )}
+          </div>
         )}
-        <span className="w-24 text-right text-[13px] tabular-nums text-neutral-600 dark:text-neutral-400">
-          {item.price !== null ? `¥${item.price.toLocaleString()}` : ""}
-        </span>
-        <button
-          type="button"
-          onClick={() => setEditing((v) => !v)}
-          className="rounded p-1 text-neutral-400 opacity-0 transition group-hover:opacity-100 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
-          aria-label={editing ? "閉じる" : "編集"}
-          title={editing ? "閉じる" : "編集"}
-        >
-          <PencilIcon />
-        </button>
       </div>
       {editing && (
         <EditPanel
