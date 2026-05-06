@@ -8,9 +8,11 @@ import { StatusDot, StatusPill } from "./Pill";
 export function StatusMenu({
   value,
   onChange,
+  compact = false,
 }: {
   value: WishStatus | null;
   onChange: (next: WishStatus | null) => void;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -31,16 +33,21 @@ export function StatusMenu({
     };
   }, [open]);
 
+  const label = value ?? "未設定";
   return (
     <div ref={ref} className="relative inline-block">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center rounded px-1.5 py-0.5 transition hover:bg-neutral-100 dark:hover:bg-white/5"
+        className={`inline-flex items-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5 ${
+          compact ? "p-1" : "px-1.5 py-0.5"
+        }`}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={compact ? `ステータス: ${label}` : undefined}
+        title={compact ? label : undefined}
       >
-        <StatusPill status={value} />
+        {compact ? <StatusDot status={value} /> : <StatusPill status={value} />}
       </button>
       {open && (
         <div
