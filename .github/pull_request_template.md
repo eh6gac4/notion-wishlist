@@ -8,6 +8,7 @@
 
 ## Test plan
 
+- [ ] `/simplify` で自己レビュー
 - [ ] `npm run check`（typecheck + unit test）
 - [ ] `npm run build`
 - [ ] `npm run test:e2e`

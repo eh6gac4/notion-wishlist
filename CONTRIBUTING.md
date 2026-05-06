@@ -6,7 +6,7 @@ main は常にデプロイ可能な状態を保ち、機能追加・修正は必
 ## 1 サイクルの全体像
 
 ```
-作業ブランチ作成 → 実装 → ユニットテスト → UI テスト → コミット → push → PR 作成 → レビュー → マージ
+作業ブランチ作成 → 実装 → /simplify（自己レビュー） → ユニットテスト → UI テスト → コミット → push → PR 作成 → レビュー → マージ
 ```
 
 ## 1. 作業ブランチを切る
@@ -35,7 +35,23 @@ git switch -c <prefix>/<short-description>
 - 既存の構造（`app/`, `components/`, `lib/`）に従う
 - Notion API への依存は `lib/store.ts` を経由（`lib/notion.ts` / `lib/mock.ts` を直接呼ばない）
 
-## 3. ユニットテスト（Vitest）
+## 3. `/simplify` で自己レビュー
+
+テストを書き始める前に、Claude Code の `/simplify` スキルで変更ファイルを一度レビューします。
+このタイミングで挟む理由:
+
+- まだコミットしていないので、見つかった問題を**直接書き換えられる**
+- 重複・過剰な抽象・不要な防御コードを**テストを書き直す前**に落とせる（二度手間防止）
+- PR レビュアの目に晒す前に「読みづらさ」「不必要な複雑さ」を削れる
+
+```text
+/simplify
+```
+
+`/simplify` は変更されたコードを再利用性・品質・効率の観点でレビューし、問題があれば自動で修正します。
+出力された改善点に納得できないものは無理に取り込まず、判断を残してください（メモリに残しても良い）。
+
+## 4. ユニットテスト（Vitest）
 
 ```bash
 npm test           # 1 回実行
@@ -46,7 +62,7 @@ npm run test:watch # 監視モード
 - 環境は `jsdom`、`@testing-library/react` でコンポーネント描画も可
 - ロジック中心の対象（`lib/notion.ts` の変換・`lib/mock.ts` の CRUD・`components/Pill.tsx` のような純コンポーネント）は必ずテストを増やす
 
-## 4. UI テスト（Playwright）
+## 5. UI テスト（Playwright）
 
 ```bash
 npm run test:e2e        # ヘッドレス実行
@@ -57,7 +73,7 @@ npm run test:e2e:ui     # UI モードで対話的に
 - `webServer` がダミーモード（`USE_MOCK_DATA=1`）の dev を自動起動するので、テスト前にサーバを立てる必要はない
 - 初回は `npx playwright install chromium` でブラウザをダウンロード
 
-## 5. ローカル一括チェック
+## 6. ローカル一括チェック
 
 push 前に必ず:
 
@@ -67,13 +83,13 @@ npm run build          # 本番ビルドが通ること
 npm run test:e2e       # E2E が通ること
 ```
 
-## 6. コミット
+## 7. コミット
 
 - メッセージは現在形・命令形（"add ...", "fix ..."）で、1 PR 内で意味のある単位に分ける
 - `.env.local` など秘密情報は絶対にコミットしない（`.gitignore` で除外済み）
 - pre-commit フック等が失敗した場合は **amend ではなく新しいコミット** を作って修正する
 
-## 7. push と PR
+## 8. push と PR
 
 ```bash
 git push -u origin <branch>
@@ -89,7 +105,7 @@ PR テンプレ（`.github/pull_request_template.md`）に沿って:
 
 を埋めること。
 
-## 8. CI
+## 9. CI
 
 GitHub Actions（`.github/workflows/ci.yml`）が PR で自動的に下記を実行します:
 
@@ -98,7 +114,7 @@ GitHub Actions（`.github/workflows/ci.yml`）が PR で自動的に下記を実
 
 両方 green になるまでマージしません。
 
-## 9. レビューとマージ
+## 10. レビューとマージ
 
 - 自分以外のレビューが付くまでマージしない（1 人運用なら自レビューでも可、その場合はセルフコメントで意図を残す）
 - マージ方式は **Squash and merge** を推奨（main の履歴を線形に保つ）
