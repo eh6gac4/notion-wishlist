@@ -88,3 +88,77 @@ npm run start      # 本番起動
 npm run typecheck  # 型チェック
 npm run lint       # Lint
 ```
+
+## Cloudflare Workers へのデプロイ
+
+本番環境は [Cloudflare Workers](https://developers.cloudflare.com/workers/) 上で
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) アダプタを通して動かしている。
+静的アセットは Workers Assets バインディングから配信され、Route Handlers は同じ Worker 内で実行される。
+
+### 認証は API トークン方式
+
+`wrangler login` のブラウザ認証は使わず、API トークンを `.env.local` に置いて
+`dotenv-cli` 経由で `wrangler` に渡す（CI でもローカルでも同じ流れ）。
+
+1. <https://dash.cloudflare.com/profile/api-tokens> で API トークンを作成。
+   テンプレ「Edit Cloudflare Workers」、または最低限以下の権限:
+   - Account → Workers Scripts: **Edit**
+   - Account → Workers KV Storage: **Edit**
+   - User → User Details: **Read**
+2. <https://dash.cloudflare.com/> 右上の **Account ID** をコピー。
+3. `.env.local` に追記:
+
+```bash
+CLOUDFLARE_API_TOKEN=cf_xxx
+CLOUDFLARE_ACCOUNT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+`npm run cf:*` スクリプトは `dotenv -e .env.local --` で `wrangler` を起動するので、
+シェルに `export` する必要はない。
+
+### 初期セットアップ（1 回だけ）
+
+`NOTION_TOKEN` を Cloudflare の暗号化 secret として登録する。`.env.local` の値を
+そのまま標準入力で渡す:
+
+```bash
+# .env.local の NOTION_TOKEN を読み取って secret 登録（対話なし）
+sed -n 's/^NOTION_TOKEN=//p' .env.local | npm run cf:secret -- NOTION_TOKEN
+```
+
+対話で打ち込みたければ:
+
+```bash
+npm run cf:secret -- NOTION_TOKEN
+```
+
+`NOTION_DATABASE_ID` と `USE_MOCK_DATA` は `wrangler.jsonc` の `vars` に入っている。
+変更したい場合は `wrangler.jsonc` を編集して再デプロイすれば反映される。
+
+### ローカルプレビュー（Workers ランタイムで動かす）
+
+```bash
+# .dev.vars を用意（NOTION_TOKEN などローカル専用の値。.env.local とは別ファイル）
+cp .dev.vars.example .dev.vars
+
+npm run cf:preview
+```
+
+### デプロイ
+
+```bash
+npm run cf:deploy
+```
+
+内部で `opennextjs-cloudflare build` → `wrangler deploy` を実行する。
+ビルド成果物は `.open-next/` 以下に出る（gitignore 済み）。
+
+### 型生成
+
+`wrangler.jsonc` のバインディングや `vars` を変えたあとは、TypeScript 側の型を再生成する:
+
+```bash
+npm run cf:typegen
+```
+
+`worker-configuration.d.ts` が更新される（gitignore 済み・各自で生成）。

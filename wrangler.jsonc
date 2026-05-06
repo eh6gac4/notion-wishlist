@@ -1,0 +1,19 @@
+// 秘密値は `wrangler secret put` で登録。`vars` には公開しても良い値のみ置く。
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "notion-wishlist",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "NOTION_DATABASE_ID": "31a1690d811d45f7895dfe9ff0adf29b",
+    "USE_MOCK_DATA": "0"
+  }
+}

@@ -72,12 +72,15 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await res.json();
+    const data = (await res.json()) as { item?: WishItem; error?: string };
     if (!res.ok) {
       setError(data.error ?? "作成に失敗しました");
       return false;
     }
-    setItems((prev) => [data.item as WishItem, ...prev]);
+    if (data.item) {
+      const created = data.item;
+      setItems((prev) => [created, ...prev]);
+    }
     return true;
   }
 
@@ -93,7 +96,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
       body: JSON.stringify(patch),
     });
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
       setError(data.error ?? "更新に失敗しました");
       setItems(prev);
     }
@@ -106,7 +109,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
     setItems((curr) => curr.filter((it) => it.id !== id));
     const res = await fetch(`/api/items/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
       setError(data.error ?? "削除に失敗しました");
       setItems(prev);
     }

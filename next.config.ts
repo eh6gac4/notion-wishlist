@@ -11,3 +11,10 @@ const config: NextConfig = {
 };
 
 export default config;
+
+// dev only: enables getCloudflareContext() bindings under `next dev`.
+if (process.env.NODE_ENV === "development") {
+  import("@opennextjs/cloudflare")
+    .then(({ initOpenNextCloudflareForDev }) => initOpenNextCloudflareForDev())
+    .catch((e) => console.error("[opennext dev init] failed:", e));
+}

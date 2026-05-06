@@ -141,3 +141,26 @@ NOTION_TOKEN=...
 NOTION_DATABASE_ID=...
 USE_MOCK_DATA=0   # 1 にすればトークン無しでメモリ内ダミーデータで動く
 ```
+
+Workers ランタイムでローカル動作確認したい場合は `.dev.vars` を別途用意する（`.dev.vars.example` をコピー）。
+
+## 11. デプロイ（Cloudflare Workers）
+
+main ブランチに入ったら `npm run cf:deploy` で Cloudflare Workers にデプロイ。
+詳細・初期セットアップは README の「Cloudflare Workers へのデプロイ」を参照。
+
+```bash
+npm run cf:preview   # ローカルで Workers ランタイム確認
+npm run cf:deploy    # 本番デプロイ
+```
+
+認証は API トークン方式。`.env.local` に下記を入れておけば `npm run cf:*` が
+`dotenv -e .env.local --` 経由で wrangler に渡してくれる:
+
+```
+CLOUDFLARE_API_TOKEN=...
+CLOUDFLARE_ACCOUNT_ID=...
+```
+
+`NOTION_TOKEN` は `npm run cf:secret -- NOTION_TOKEN` で 1 度だけ登録すればよい
+（`wrangler.jsonc` の `vars` には**書かない**。漏れると平文で公開されるため）。

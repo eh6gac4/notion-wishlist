@@ -1,0 +1,6 @@
+# wrangler dev 用のローカル変数（Workers 上で動かすときに参照される）
+# `wrangler.jsonc` の `vars` を上書きしたい場合や、ローカルでだけ secret を入れたいときに使う。
+# 実値を入れた `.dev.vars` は gitignore 済み。
+NOTION_TOKEN=secret_xxx
+NOTION_DATABASE_ID=31a1690d811d45f7895dfe9ff0adf29b
+USE_MOCK_DATA=0
