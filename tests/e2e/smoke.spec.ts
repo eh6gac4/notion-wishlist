@@ -40,3 +40,34 @@ test.describe("Wishlist", () => {
     ).toHaveCount(0);
   });
 });
+
+test.describe("PWA", () => {
+  test("manifest.webmanifest が JSON で配信される", async ({ request }) => {
+    const res = await request.get("/manifest.webmanifest");
+    expect(res.status()).toBe(200);
+    const json = await res.json();
+    expect(json.name).toBe("Wishlist");
+    expect(json.display).toBe("standalone");
+    expect(Array.isArray(json.icons)).toBe(true);
+    expect(json.icons.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('<link rel="manifest"> と theme-color が head にある', async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute(
+      "href",
+      "/manifest.webmanifest"
+    );
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+      "content",
+      "#0f172a"
+    );
+  });
+
+  test("/offline ページが表示される", async ({ page }) => {
+    await page.goto("/offline");
+    await expect(
+      page.getByRole("heading", { name: "オフラインです" })
+    ).toBeVisible();
+  });
+});
