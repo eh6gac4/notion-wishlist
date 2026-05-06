@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  --notion-border: rgba(55, 53, 47, 0.09);
+  --notion-border-strong: rgba(55, 53, 47, 0.16);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --notion-border: rgba(255, 255, 255, 0.094);
+    --notion-border-strong: rgba(255, 255, 255, 0.155);
+  }
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-neutral-900 dark:bg-[#191919] dark:text-neutral-100;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notion-border {
+  border-color: var(--notion-border);
+}
+.notion-border-strong {
+  border-color: var(--notion-border-strong);
+}
