@@ -15,7 +15,8 @@
     "check": "npm run typecheck && npm run test",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "dotenv -e .env.local -- sh -c 'npm run cf:build && opennextjs-cloudflare preview'",
-    "cf:deploy": "dotenv -e .env.local -- sh -c 'npm run cf:build && opennextjs-cloudflare deploy'",
+    "cf:deploy:ci": "npm run cf:build && opennextjs-cloudflare deploy",
+    "cf:deploy": "dotenv -e .env.local -- npm run cf:deploy:ci",
     "cf:secret": "dotenv -e .env.local -- wrangler secret put",
     "cf:typegen": "dotenv -e .env.local -- wrangler types --env-interface CloudflareEnv ./worker-configuration.d.ts"
   },
