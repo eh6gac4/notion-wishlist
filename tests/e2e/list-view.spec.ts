@@ -51,15 +51,51 @@ test.describe("ListView - グルーピング時のコンパクトステータス
 });
 
 test.describe("ListView - 名前のレイアウト", () => {
-  test("名前リンクは break-words で折り返し可能、truncate されない", async ({
+  test("名前は break-words で折り返し可能、truncate されない", async ({
     page,
   }) => {
     await page.goto("/");
-    const nameLink = page.getByRole("link", {
-      name: "HHKB Professional HYBRID Type-S 雪",
-    });
-    await expect(nameLink).toBeVisible();
-    await expect(nameLink).toHaveClass(/break-words/);
-    await expect(nameLink).not.toHaveClass(/truncate/);
+    const nameText = page
+      .getByText("HHKB Professional HYBRID Type-S 雪")
+      .first();
+    await expect(nameText).toBeVisible();
+    await expect(nameText).toHaveClass(/break-words/);
+    await expect(nameText).not.toHaveClass(/truncate/);
+  });
+});
+
+test.describe("ListView - 項目タップとステータスタップの分離", () => {
+  test("項目本体をタップすると詳細ダイアログが開く", async ({ page }) => {
+    await page.goto("/");
+    await page
+      .getByRole("button", {
+        name: /BenQ ScreenBar Halo モニターライト の詳細を開く/,
+      })
+      .click();
+    const dialog = page.getByRole("dialog", { name: "項目の詳細" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel("品名 *")).toHaveValue(
+      "BenQ ScreenBar Halo モニターライト"
+    );
+    // ステータスや優先度もダイアログ内で編集できる
+    await expect(dialog.getByLabel("ステータス")).toBeVisible();
+    await expect(dialog.getByLabel("優先度")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  });
+
+  test("ステータスドットをタップしてもダイアログは開かない", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page
+      .getByRole("button", { name: "ステータス: 検討中", exact: true })
+      .first()
+      .click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "項目の詳細" })
+    ).toHaveCount(0);
+    await page.keyboard.press("Escape");
   });
 });
