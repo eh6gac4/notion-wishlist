@@ -25,7 +25,11 @@ export function getNotion(): Client {
     throw new Error("NOTION_TOKEN is not set");
   }
   if (!_client) {
-    _client = new Client({ auth: token });
+    // Workers の nodejs_compat では SDK 既定の node-fetch 経路が落ちるためグローバル fetch を渡す。
+    _client = new Client({
+      auth: token,
+      fetch: (url, init) => globalThis.fetch(url, init),
+    });
   }
   return _client;
 }
