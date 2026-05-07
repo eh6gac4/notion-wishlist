@@ -81,6 +81,8 @@ USE_MOCK_DATA=0   # Notion を使う（トークン未設定だとエラー）
 
 詳細ダイアログの「分析する」ボタンを押すと、Claude API がアイテム情報（品名・価格・優先度・登録経過日数・メモ等）を踏まえて「買う／見送る／保留」の結論と理由を返し、対象 Notion ページの本文末尾に「🤖 AI 分析（時刻）」見出し + 箇条書きとして追記します。再分析しても過去のブロックは削除されず、履歴として末尾に積み上がります（不要になれば Notion 側で手動削除可能）。
 
+ダイアログを開くと過去の分析履歴を Notion から読み出して新しい順に表示します。
+
 - 環境変数 `ANTHROPIC_API_KEY` を設定（モックモード時は未設定でもダミー分析が返る）
 - モデルは既定で `claude-haiku-4-5-20251001`。`ANTHROPIC_MODEL` で上書き可能
 - Cloudflare Workers では `npm run cf:secret -- ANTHROPIC_API_KEY` で secret として登録
@@ -95,6 +97,7 @@ USE_MOCK_DATA=0   # Notion を使う（トークン未設定だとエラー）
 | `PATCH` | `/api/items/[id]` | 部分更新 |
 | `DELETE` | `/api/items/[id]` | アーカイブ |
 | `POST` | `/api/items/[id]/analyze` | AI 分析を実行し、結果を保存 |
+| `GET` | `/api/items/[id]/analyses` | 過去の AI 分析履歴を取得 |
 
 ## コマンド
 

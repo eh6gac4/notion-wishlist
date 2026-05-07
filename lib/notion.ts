@@ -4,8 +4,14 @@ import type {
   CreatePageParameters,
   UpdatePageParameters,
   AppendBlockChildrenParameters,
+  ListBlockChildrenResponse,
 } from "@notionhq/client/build/src/api-endpoints";
-import type { WishItem, WishItemInput, WishItemPatch } from "./types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemInput,
+  WishItemPatch,
+} from "./types";
 
 const token = process.env.NOTION_TOKEN;
 const databaseId = process.env.NOTION_DATABASE_ID;
@@ -206,17 +212,24 @@ export async function archiveItem(id: string): Promise<void> {
 
 type BlockChild = AppendBlockChildrenParameters["children"][number];
 
+const ANALYSIS_HEADING_PREFIX = "🤖 AI 分析";
+const ANALYSIS_HEADING_RE = /^🤖 AI 分析（(.+)）$/;
+
 export function buildAnalysisBlocks(
   text: string,
-  analyzedAt: Date
+  analyzedAt: string
 ): BlockChild[] {
-  const heading = `🤖 AI 分析（${formatTimestampJa(analyzedAt)}）`;
   const blocks: BlockChild[] = [
     { type: "divider", divider: {} },
     {
       type: "heading_3",
       heading_3: {
-        rich_text: [{ type: "text", text: { content: heading } }],
+        rich_text: [
+          {
+            type: "text",
+            text: { content: `${ANALYSIS_HEADING_PREFIX}（${analyzedAt}）` },
+          },
+        ],
       },
     },
   ];
@@ -246,7 +259,7 @@ export function buildAnalysisBlocks(
 export async function appendAnalysisBlocks(
   pageId: string,
   text: string,
-  analyzedAt: Date
+  analyzedAt: string
 ): Promise<void> {
   const notion = getNotion();
   await notion.blocks.children.append({
@@ -255,7 +268,69 @@ export async function appendAnalysisBlocks(
   });
 }
 
-function formatTimestampJa(d: Date): string {
+export function parseAnalysesFromBlocks(
+  blocks: ListBlockChildrenResponse["results"]
+): AnalysisResult[] {
+  const entries: AnalysisResult[] = [];
+  let current: { analyzedAt: string; lines: string[] } | null = null;
+  const flush = () => {
+    if (current) {
+      entries.push({
+        analyzedAt: current.analyzedAt,
+        analysis: current.lines.join("\n"),
+      });
+      current = null;
+    }
+  };
+
+  for (const block of blocks) {
+    if (!("type" in block)) continue;
+    if (block.type === "heading_3") {
+      const text = richTextToPlain(block.heading_3.rich_text);
+      const match = ANALYSIS_HEADING_RE.exec(text);
+      flush();
+      if (match) current = { analyzedAt: match[1], lines: [] };
+      continue;
+    }
+    if (block.type === "divider") {
+      flush();
+      continue;
+    }
+    if (!current) continue;
+    if (block.type === "bulleted_list_item") {
+      current.lines.push(
+        `・${richTextToPlain(block.bulleted_list_item.rich_text)}`
+      );
+    } else if (block.type === "paragraph") {
+      current.lines.push(richTextToPlain(block.paragraph.rich_text));
+    }
+  }
+  flush();
+  return entries;
+}
+
+type RichTextItem = { plain_text?: string };
+function richTextToPlain(items: readonly RichTextItem[]): string {
+  return items.map((t) => t.plain_text ?? "").join("");
+}
+
+export async function listAnalyses(pageId: string): Promise<AnalysisResult[]> {
+  const notion = getNotion();
+  const out: AnalysisResult[] = [];
+  let cursor: string | undefined;
+  do {
+    const res = await notion.blocks.children.list({
+      block_id: pageId,
+      start_cursor: cursor,
+      page_size: 100,
+    });
+    out.push(...parseAnalysesFromBlocks(res.results));
+    cursor = res.has_more ? res.next_cursor ?? undefined : undefined;
+  } while (cursor);
+  return out;
+}
+
+export function formatTimestampJa(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

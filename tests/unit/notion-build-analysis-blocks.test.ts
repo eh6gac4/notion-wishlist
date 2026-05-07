@@ -21,15 +21,14 @@ function bulletText(block: unknown): string {
 
 describe("buildAnalysisBlocks", () => {
   it("見出し（divider + heading_3）を最初に置き、行内容を bullet/paragraph に振り分ける", () => {
-    const at = new Date("2026-05-07T10:30:00.000Z");
     const blocks = buildAnalysisBlocks(
       "保留\n・優先度が「中」\n・もう少し検討する余地あり\n断定はできません。",
-      at
+      "2026-05-07 10:30"
     );
 
     expect(blocks[0]).toEqual({ type: "divider", divider: {} });
     expect(getType(blocks[1])).toBe("heading_3");
-    expect(headingText(blocks[1])).toContain("🤖 AI 分析");
+    expect(headingText(blocks[1])).toBe("🤖 AI 分析（2026-05-07 10:30）");
 
     // 結論「保留」は通常段落
     expect(getType(blocks[2])).toBe("paragraph");
@@ -41,7 +40,7 @@ describe("buildAnalysisBlocks", () => {
   });
 
   it("空行は無視する", () => {
-    const blocks = buildAnalysisBlocks("買う\n\n・理由", new Date());
+    const blocks = buildAnalysisBlocks("買う\n\n・理由", "2026-05-07 10:30");
     // divider, heading, paragraph(買う), bullet(理由) の 4 ブロックだけ
     expect(blocks).toHaveLength(4);
   });

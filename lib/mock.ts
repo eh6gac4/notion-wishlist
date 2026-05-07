@@ -1,7 +1,14 @@
-import type { WishItem, WishItemInput, WishItemPatch } from "./types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemInput,
+  WishItemPatch,
+} from "./types";
+import { formatTimestampJa } from "./notion";
 
 type Store = {
   items: Map<string, WishItem>;
+  analyses: Map<string, AnalysisResult[]>;
   seeded: boolean;
 };
 
@@ -13,6 +20,7 @@ function getStore(): Store {
   if (!globalRef.__wishlistMockStore) {
     globalRef.__wishlistMockStore = {
       items: new Map(),
+      analyses: new Map(),
       seeded: false,
     };
   }
@@ -162,18 +170,25 @@ export async function archiveItemMock(id: string): Promise<void> {
   store.items.delete(id);
 }
 
-export async function analyzeItemMock(
-  id: string
-): Promise<{ analysis: string; analyzedAt: string }> {
+export async function analyzeItemMock(id: string): Promise<AnalysisResult> {
   const store = getStore();
   const existing = store.items.get(id);
   if (!existing) {
     throw new Error(`item not found: ${id}`);
   }
-  return {
+  const result: AnalysisResult = {
     analysis: cannedAnalysis(existing),
-    analyzedAt: new Date().toISOString(),
+    analyzedAt: formatTimestampJa(new Date()),
   };
+  const history = store.analyses.get(id) ?? [];
+  history.push(result);
+  store.analyses.set(id, history);
+  return result;
+}
+
+export async function listAnalysesMock(id: string): Promise<AnalysisResult[]> {
+  const store = getStore();
+  return store.analyses.get(id) ?? [];
 }
 
 function cannedAnalysis(item: WishItem): string {

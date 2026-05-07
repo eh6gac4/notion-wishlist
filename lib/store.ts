@@ -11,6 +11,8 @@ import {
   archiveItem as notionArchive,
   getItem as notionGet,
   appendAnalysisBlocks,
+  listAnalyses as notionListAnalyses,
+  formatTimestampJa,
 } from "./notion";
 import {
   listItemsMock,
@@ -18,6 +20,7 @@ import {
   updateItemMock,
   archiveItemMock,
   analyzeItemMock,
+  listAnalysesMock,
 } from "./mock";
 import { isMockMode } from "./env";
 
@@ -48,7 +51,11 @@ export async function analyzeItem(id: string): Promise<AnalysisResult> {
   const { analyzeWishItem } = await import("./anthropic");
   const item = await notionGet(id);
   const analysis = await analyzeWishItem(item);
-  const analyzedAt = new Date();
+  const analyzedAt = formatTimestampJa(new Date());
   await appendAnalysisBlocks(id, analysis, analyzedAt);
-  return { analysis, analyzedAt: analyzedAt.toISOString() };
+  return { analysis, analyzedAt };
+}
+
+export async function listAnalyses(id: string): Promise<AnalysisResult[]> {
+  return isMockMode() ? listAnalysesMock(id) : notionListAnalyses(id);
 }

@@ -16,6 +16,7 @@ test.describe("AI 分析機能", () => {
 
     const analysisSection = dialog.getByRole("region", { name: "AI 分析" });
     await expect(analysisSection).toBeVisible();
+    // 履歴の取得が完了するまで「未分析。」プレースホルダが出る
     await expect(
       analysisSection.getByText("未分析。", { exact: false })
     ).toBeVisible();
@@ -28,9 +29,9 @@ test.describe("AI 分析機能", () => {
     await expect(
       analysisSection.getByText(/買う|見送る|保留/)
     ).toBeVisible();
-    // 追記済みのアナウンスが出る
+    // タイムスタンプ（YYYY-MM-DD HH:MM）が表示される
     await expect(
-      analysisSection.getByText("Notion ページ本文に追記済み", { exact: false })
+      analysisSection.getByText(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)
     ).toBeVisible();
     // ボタンは「再分析」に変わる
     await expect(
