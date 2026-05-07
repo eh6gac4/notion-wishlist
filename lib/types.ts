@@ -26,6 +26,8 @@ export type WishItemInput = {
 
 export type WishItemPatch = Partial<WishItemInput>;
 
+export type AnalysisResult = { analysis: string; analyzedAt: string };
+
 export const STATUSES: WishStatus[] = [
   "検討中",
   "購入予定",

@@ -1,20 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { WishItem, WishItemPatch } from "@/lib/types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemPatch,
+} from "@/lib/types";
 import { WishItemFields, type WishItemFieldsValues } from "./WishItemFields";
+
+function analyzeButtonLabel(
+  isAnalyzing: boolean,
+  hasHistory: boolean
+): string {
+  if (isAnalyzing) return "分析中…";
+  return hasHistory ? "再分析" : "分析する";
+}
 
 export function ItemDetailDialog({
   item,
   onPatch,
   onDelete,
+  onAnalyze,
   onClose,
 }: {
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
+  onAnalyze: () => Promise<AnalysisResult>;
   onClose: () => void;
 }) {
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analyses, setAnalyses] = useState<AnalysisResult[] | null>(null);
   const [values, setValues] = useState<WishItemFieldsValues>(() => ({
     name: item.name,
     url: item.url ?? "",
@@ -33,6 +50,35 @@ export function ItemDetailDialog({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/items/${item.id}/analyses`);
+        const data = (await res.json().catch(() => ({}))) as {
+          analyses?: AnalysisResult[];
+          error?: string;
+        };
+        if (!alive) return;
+        if (!res.ok || !data.analyses) {
+          setAnalysisError(data.error ?? "分析履歴の取得に失敗しました");
+          setAnalyses([]);
+          return;
+        }
+        setAnalyses(data.analyses);
+      } catch (e) {
+        if (!alive) return;
+        setAnalysisError(
+          e instanceof Error ? e.message : "分析履歴の取得に失敗しました"
+        );
+        setAnalyses([]);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [item.id]);
+
   function handleSave() {
     if (!values.name.trim()) return;
     onPatch({
@@ -44,6 +90,20 @@ export function ItemDetailDialog({
       purchaseDate: values.purchaseDate || null,
       memo: values.memo.trim() || null,
     });
+  }
+
+  async function handleAnalyze() {
+    if (analyzing) return;
+    setAnalysisError(null);
+    setAnalyzing(true);
+    try {
+      const result = await onAnalyze();
+      setAnalyses((prev) => [...(prev ?? []), result]);
+    } catch (e) {
+      setAnalysisError(e instanceof Error ? e.message : "分析に失敗しました");
+    } finally {
+      setAnalyzing(false);
+    }
   }
 
   return (
@@ -64,6 +124,59 @@ export function ItemDetailDialog({
           nameRequired
           allowUnset
         />
+
+        <section
+          aria-label="AI 分析"
+          className="mt-4 rounded border border-[var(--notion-border)] bg-neutral-50 p-2.5 dark:bg-white/[0.03]"
+        >
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
+              AI 分析
+            </span>
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={analyzing}
+              className="rounded border border-[var(--notion-border-strong)] px-2 py-0.5 text-[12px] text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 dark:text-neutral-200 dark:hover:bg-white/5"
+            >
+              {analyzeButtonLabel(analyzing, (analyses?.length ?? 0) > 0)}
+            </button>
+          </div>
+          {analysisError && (
+            <p className="mb-1.5 text-[12px] text-rose-600 dark:text-rose-400">
+              {analysisError}
+            </p>
+          )}
+          {analyses === null ? (
+            <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+              履歴を読み込み中…
+            </p>
+          ) : analyses.length === 0 ? (
+            analyzing ? null : (
+              <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+                未分析。ボタンを押すと Claude が判定し、Notion ページ本文に追記します。
+              </p>
+            )
+          ) : (
+            <ul className="space-y-2">
+              {[...analyses].reverse().map((entry, i) => (
+                <li
+                  key={`${entry.analyzedAt}-${i}`}
+                  className="rounded border border-[var(--notion-border)] bg-white p-2 dark:bg-white/[0.02]"
+                >
+                  <p className="mb-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                    {entry.analyzedAt}
+                    {i === 0 && analyses.length > 1 ? "（最新）" : ""}
+                  </p>
+                  <pre className="whitespace-pre-wrap break-words font-sans text-[12.5px] leading-relaxed text-neutral-800 dark:text-neutral-200">
+                    {entry.analysis}
+                  </pre>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
         <div className="mt-4 flex items-center justify-between">
           <button
             type="button"

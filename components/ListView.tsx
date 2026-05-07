@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { WishItem, WishItemPatch, WishStatus } from "@/lib/types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemPatch,
+  WishStatus,
+} from "@/lib/types";
 import { STATUSES, TERMINAL_STATUSES } from "@/lib/types";
 import { PriorityText, StatusDot } from "./Pill";
 import { StatusMenu } from "./StatusMenu";
@@ -11,6 +16,7 @@ export function ListView({
   items,
   onPatch,
   onDelete,
+  onAnalyze,
   onAddInStatus,
   groupByStatus,
   hideTerminalSections = false,
@@ -18,6 +24,7 @@ export function ListView({
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
+  onAnalyze: (id: string) => Promise<AnalysisResult>;
   onAddInStatus: (status: WishStatus) => void;
   groupByStatus: boolean;
   hideTerminalSections?: boolean;
@@ -62,6 +69,7 @@ export function ListView({
               item={it}
               onPatch={(p) => onPatch(it.id, p)}
               onDelete={() => onDelete(it.id)}
+              onAnalyze={() => onAnalyze(it.id)}
             />
           ))
         )}
@@ -78,6 +86,7 @@ export function ListView({
           items={sec.items}
           onPatch={onPatch}
           onDelete={onDelete}
+          onAnalyze={onAnalyze}
           onAdd={
             sec.showAdd ? () => onAddInStatus(sec.key as WishStatus) : undefined
           }
@@ -92,12 +101,14 @@ function Section({
   items,
   onPatch,
   onDelete,
+  onAnalyze,
   onAdd,
 }: {
   title: WishStatus | "未設定";
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
+  onAnalyze: (id: string) => Promise<AnalysisResult>;
   onAdd?: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(
@@ -144,6 +155,7 @@ function Section({
                 item={it}
                 onPatch={(p) => onPatch(it.id, p)}
                 onDelete={() => onDelete(it.id)}
+                onAnalyze={() => onAnalyze(it.id)}
               />
             ))
           )}
@@ -166,10 +178,12 @@ function Row({
   item,
   onPatch,
   onDelete,
+  onAnalyze,
 }: {
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
+  onAnalyze: () => Promise<AnalysisResult>;
 }) {
   const [open, setOpen] = useState(false);
   const hasMeta =
@@ -229,6 +243,7 @@ function Row({
             onDelete();
             setOpen(false);
           }}
+          onAnalyze={onAnalyze}
           onClose={() => setOpen(false)}
         />
       )}

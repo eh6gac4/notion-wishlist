@@ -1,7 +1,14 @@
-import type { WishItem, WishItemInput, WishItemPatch } from "./types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemInput,
+  WishItemPatch,
+} from "./types";
+import { formatTimestampJa } from "./notion";
 
 type Store = {
   items: Map<string, WishItem>;
+  analyses: Map<string, AnalysisResult[]>;
   seeded: boolean;
 };
 
@@ -13,6 +20,7 @@ function getStore(): Store {
   if (!globalRef.__wishlistMockStore) {
     globalRef.__wishlistMockStore = {
       items: new Map(),
+      analyses: new Map(),
       seeded: false,
     };
   }
@@ -160,4 +168,51 @@ export async function updateItemMock(
 export async function archiveItemMock(id: string): Promise<void> {
   const store = getStore();
   store.items.delete(id);
+}
+
+export async function analyzeItemMock(id: string): Promise<AnalysisResult> {
+  const store = getStore();
+  const existing = store.items.get(id);
+  if (!existing) {
+    throw new Error(`item not found: ${id}`);
+  }
+  const result: AnalysisResult = {
+    analysis: cannedAnalysis(existing),
+    analyzedAt: formatTimestampJa(new Date()),
+  };
+  const history = store.analyses.get(id) ?? [];
+  history.push(result);
+  store.analyses.set(id, history);
+  return result;
+}
+
+export async function listAnalysesMock(id: string): Promise<AnalysisResult[]> {
+  const store = getStore();
+  return store.analyses.get(id) ?? [];
+}
+
+function cannedAnalysis(item: WishItem): string {
+  const days = Math.max(
+    0,
+    Math.floor(
+      (Date.now() - new Date(item.createdAt).getTime()) / 86_400_000
+    )
+  );
+  const verdict =
+    item.priority === "高"
+      ? "買う"
+      : item.priority === "低" || (item.price ?? 0) >= 100_000
+        ? "見送る"
+        : "保留";
+  const reasons: string[] = [];
+  reasons.push(`・優先度が「${item.priority ?? "未設定"}」で登録から ${days} 日経過`);
+  if (item.price !== null) {
+    reasons.push(`・価格 ¥${item.price.toLocaleString("ja-JP")} を予算と相談する余地あり`);
+  }
+  if (item.memo) {
+    reasons.push(`・メモ「${item.memo}」の懸念を解消できれば判断しやすい`);
+  } else {
+    reasons.push("・メモが空欄なので、決め手・代替案を書き出してから再判断するのが安全");
+  }
+  return [verdict, ...reasons].join("\n") + "\n（※ モックデータの簡易分析です）";
 }
