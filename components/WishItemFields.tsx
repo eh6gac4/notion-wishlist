@@ -12,6 +12,7 @@ export type WishItemFieldsValues = {
   status: WishStatus | null;
   priority: WishPriority | null;
   purchaseDate: string;
+  memo: string;
 };
 
 export function WishItemFields({
@@ -100,6 +101,15 @@ export function WishItemFields({
             </option>
           ))}
         </select>
+      </Field>
+      <Field label="メモ" className="sm:col-span-2">
+        <textarea
+          value={values.memo}
+          onChange={(e) => onChange({ memo: e.target.value })}
+          rows={3}
+          placeholder="検討理由や型番、店舗候補など"
+          className={`${inputCls} resize-y`}
+        />
       </Field>
     </div>
   );

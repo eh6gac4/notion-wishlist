@@ -35,6 +35,7 @@ function seed(store: Store) {
       status: "購入予定",
       priority: "高",
       purchaseDate: addDays(now, 14),
+      memo: "英語配列・無刻印モデルを優先",
       createdAt: addDays(now, -7),
       updatedAt: addDays(now, -1),
     },
@@ -46,6 +47,7 @@ function seed(store: Store) {
       status: "検討中",
       priority: "中",
       purchaseDate: null,
+      memo: null,
       createdAt: addDays(now, -14),
       updatedAt: addDays(now, -3),
     },
@@ -57,6 +59,7 @@ function seed(store: Store) {
       status: "検討中",
       priority: "低",
       purchaseDate: null,
+      memo: "ショールームで座り心地を確認してから判断",
       createdAt: addDays(now, -30),
       updatedAt: addDays(now, -5),
     },
@@ -68,6 +71,7 @@ function seed(store: Store) {
       status: "購入済み",
       priority: "中",
       purchaseDate: addDays(now, -10),
+      memo: null,
       createdAt: addDays(now, -45),
       updatedAt: addDays(now, -10),
     },
@@ -79,6 +83,7 @@ function seed(store: Store) {
       status: "却下",
       priority: "低",
       purchaseDate: null,
+      memo: null,
       createdAt: addDays(now, -20),
       updatedAt: addDays(now, -2),
     },
@@ -116,6 +121,7 @@ export async function createItemMock(
     status: input.status ?? null,
     priority: input.priority ?? null,
     purchaseDate: input.purchaseDate ?? null,
+    memo: input.memo ?? null,
     createdAt: now,
     updatedAt: now,
   };
@@ -144,6 +150,7 @@ export async function updateItemMock(
     ...(patch.purchaseDate !== undefined
       ? { purchaseDate: patch.purchaseDate ?? null }
       : {}),
+    ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
     updatedAt: new Date().toISOString(),
   };
   store.items.set(id, updated);

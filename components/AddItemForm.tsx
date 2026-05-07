@@ -17,6 +17,7 @@ const initialValues = (status: WishStatus): WishItemFieldsValues => ({
   status,
   priority: DEFAULT_PRIORITY,
   purchaseDate: "",
+  memo: "",
 });
 
 export function AddItemForm({
@@ -54,6 +55,7 @@ export function AddItemForm({
       status: values.status,
       priority: values.priority,
       purchaseDate: values.purchaseDate || null,
+      memo: values.memo.trim() || null,
     });
     if (ok) {
       setValues(initialValues(DEFAULT_STATUS));

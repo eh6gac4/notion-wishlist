@@ -22,6 +22,7 @@ export function ItemDetailDialog({
     status: item.status,
     priority: item.priority,
     purchaseDate: item.purchaseDate ? item.purchaseDate.slice(0, 10) : "",
+    memo: item.memo ?? "",
   }));
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export function ItemDetailDialog({
       status: values.status,
       priority: values.priority,
       purchaseDate: values.purchaseDate || null,
+      memo: values.memo.trim() || null,
     });
   }
 
@@ -54,7 +56,7 @@ export function ItemDetailDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-lg border border-[var(--notion-border-strong)] bg-white p-4 shadow-lg dark:bg-[#202020]">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-[var(--notion-border-strong)] bg-white p-4 shadow-lg dark:bg-[#202020]">
         <h2 className="mb-3 text-[14px] font-medium">詳細</h2>
         <WishItemFields
           values={values}

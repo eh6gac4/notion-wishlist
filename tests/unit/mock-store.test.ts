@@ -60,6 +60,20 @@ describe("mock store", () => {
     expect(updated.updatedAt >= created.updatedAt).toBe(true);
   });
 
+  it("メモを作成・更新できる", async () => {
+    const created = await createItemMock({
+      name: "memo-test",
+      memo: "初期メモ",
+    });
+    expect(created.memo).toBe("初期メモ");
+
+    const updated = await updateItemMock(created.id, { memo: "更新メモ" });
+    expect(updated.memo).toBe("更新メモ");
+
+    const cleared = await updateItemMock(created.id, { memo: null });
+    expect(cleared.memo).toBeNull();
+  });
+
   it("archiveItemMock が一覧から削除する", async () => {
     const created = await createItemMock({ name: "doomed" });
     await archiveItemMock(created.id);
