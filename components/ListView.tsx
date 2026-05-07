@@ -11,6 +11,7 @@ export function ListView({
   items,
   onPatch,
   onDelete,
+  onAnalyze,
   onAddInStatus,
   groupByStatus,
   hideTerminalSections = false,
@@ -18,6 +19,7 @@ export function ListView({
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
+  onAnalyze: (id: string) => Promise<void>;
   onAddInStatus: (status: WishStatus) => void;
   groupByStatus: boolean;
   hideTerminalSections?: boolean;
@@ -62,6 +64,7 @@ export function ListView({
               item={it}
               onPatch={(p) => onPatch(it.id, p)}
               onDelete={() => onDelete(it.id)}
+              onAnalyze={() => onAnalyze(it.id)}
             />
           ))
         )}
@@ -78,6 +81,7 @@ export function ListView({
           items={sec.items}
           onPatch={onPatch}
           onDelete={onDelete}
+          onAnalyze={onAnalyze}
           onAdd={
             sec.showAdd ? () => onAddInStatus(sec.key as WishStatus) : undefined
           }
@@ -92,12 +96,14 @@ function Section({
   items,
   onPatch,
   onDelete,
+  onAnalyze,
   onAdd,
 }: {
   title: WishStatus | "未設定";
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
+  onAnalyze: (id: string) => Promise<void>;
   onAdd?: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(
@@ -144,6 +150,7 @@ function Section({
                 item={it}
                 onPatch={(p) => onPatch(it.id, p)}
                 onDelete={() => onDelete(it.id)}
+                onAnalyze={() => onAnalyze(it.id)}
               />
             ))
           )}
@@ -166,10 +173,12 @@ function Row({
   item,
   onPatch,
   onDelete,
+  onAnalyze,
 }: {
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
+  onAnalyze: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const hasMeta =
@@ -229,6 +238,7 @@ function Row({
             onDelete();
             setOpen(false);
           }}
+          onAnalyze={onAnalyze}
           onClose={() => setOpen(false)}
         />
       )}

@@ -36,6 +36,7 @@ function seed(store: Store) {
       priority: "高",
       purchaseDate: addDays(now, 14),
       memo: "英語配列・無刻印モデルを優先",
+      analysis: null,
       createdAt: addDays(now, -7),
       updatedAt: addDays(now, -1),
     },
@@ -48,6 +49,7 @@ function seed(store: Store) {
       priority: "中",
       purchaseDate: null,
       memo: null,
+      analysis: null,
       createdAt: addDays(now, -14),
       updatedAt: addDays(now, -3),
     },
@@ -60,6 +62,7 @@ function seed(store: Store) {
       priority: "低",
       purchaseDate: null,
       memo: "ショールームで座り心地を確認してから判断",
+      analysis: null,
       createdAt: addDays(now, -30),
       updatedAt: addDays(now, -5),
     },
@@ -72,6 +75,7 @@ function seed(store: Store) {
       priority: "中",
       purchaseDate: addDays(now, -10),
       memo: null,
+      analysis: null,
       createdAt: addDays(now, -45),
       updatedAt: addDays(now, -10),
     },
@@ -84,6 +88,7 @@ function seed(store: Store) {
       priority: "低",
       purchaseDate: null,
       memo: null,
+      analysis: null,
       createdAt: addDays(now, -20),
       updatedAt: addDays(now, -2),
     },
@@ -122,6 +127,7 @@ export async function createItemMock(
     priority: input.priority ?? null,
     purchaseDate: input.purchaseDate ?? null,
     memo: input.memo ?? null,
+    analysis: input.analysis ?? null,
     createdAt: now,
     updatedAt: now,
   };
@@ -151,6 +157,9 @@ export async function updateItemMock(
       ? { purchaseDate: patch.purchaseDate ?? null }
       : {}),
     ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
+    ...(patch.analysis !== undefined
+      ? { analysis: patch.analysis ?? null }
+      : {}),
     updatedAt: new Date().toISOString(),
   };
   store.items.set(id, updated);
@@ -160,4 +169,46 @@ export async function updateItemMock(
 export async function archiveItemMock(id: string): Promise<void> {
   const store = getStore();
   store.items.delete(id);
+}
+
+export async function analyzeItemMock(id: string): Promise<WishItem> {
+  const store = getStore();
+  const existing = store.items.get(id);
+  if (!existing) {
+    throw new Error(`item not found: ${id}`);
+  }
+  const text = cannedAnalysis(existing);
+  const updated: WishItem = {
+    ...existing,
+    analysis: text,
+    updatedAt: new Date().toISOString(),
+  };
+  store.items.set(id, updated);
+  return updated;
+}
+
+function cannedAnalysis(item: WishItem): string {
+  const days = Math.max(
+    0,
+    Math.floor(
+      (Date.now() - new Date(item.createdAt).getTime()) / 86_400_000
+    )
+  );
+  const verdict =
+    item.priority === "高"
+      ? "買う"
+      : item.priority === "低" || (item.price ?? 0) >= 100_000
+        ? "見送る"
+        : "保留";
+  const reasons: string[] = [];
+  reasons.push(`・優先度が「${item.priority ?? "未設定"}」で登録から ${days} 日経過`);
+  if (item.price !== null) {
+    reasons.push(`・価格 ¥${item.price.toLocaleString("ja-JP")} を予算と相談する余地あり`);
+  }
+  if (item.memo) {
+    reasons.push(`・メモ「${item.memo}」の懸念を解消できれば判断しやすい`);
+  } else {
+    reasons.push("・メモが空欄なので、決め手・代替案を書き出してから再判断するのが安全");
+  }
+  return [verdict, ...reasons].join("\n") + "\n（※ モックデータの簡易分析です）";
 }

@@ -17,6 +17,7 @@ export const PROPS = {
   priority: process.env.NOTION_PROP_PRIORITY ?? "優先度",
   purchaseDate: process.env.NOTION_PROP_PURCHASE_DATE ?? "購入予定日",
   memo: process.env.NOTION_PROP_MEMO ?? "メモ",
+  analysis: process.env.NOTION_PROP_ANALYSIS ?? "分析結果",
 } as const;
 
 let _client: Client | null = null;
@@ -42,7 +43,7 @@ export function getDatabaseId(): string {
   return databaseId;
 }
 
-function isFullPage(page: unknown): page is PageObjectResponse {
+export function isFullPage(page: unknown): page is PageObjectResponse {
   return (
     !!page &&
     typeof page === "object" &&
@@ -64,6 +65,7 @@ export function pageToItem(page: PageObjectResponse): WishItem {
     priority: readSelect(p[PROPS.priority]) as WishItem["priority"],
     purchaseDate: readDateStart(p[PROPS.purchaseDate]),
     memo: readRichText(p[PROPS.memo]),
+    analysis: readRichText(p[PROPS.analysis]),
     createdAt: page.created_time,
     updatedAt: page.last_edited_time,
   };
@@ -136,7 +138,23 @@ function buildProperties(
         : [],
     };
   }
+  if (input.analysis !== undefined) {
+    props[PROPS.analysis] = {
+      rich_text: input.analysis
+        ? [{ type: "text", text: { content: input.analysis } }]
+        : [],
+    };
+  }
   return props;
+}
+
+export async function getItem(id: string): Promise<WishItem> {
+  const notion = getNotion();
+  const page = await notion.pages.retrieve({ page_id: id });
+  if (!isFullPage(page)) {
+    throw new Error("Notion returned a partial page response");
+  }
+  return pageToItem(page);
 }
 
 export async function listItems(): Promise<WishItem[]> {

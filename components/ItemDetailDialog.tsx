@@ -4,17 +4,29 @@ import { useEffect, useState } from "react";
 import type { WishItem, WishItemPatch } from "@/lib/types";
 import { WishItemFields, type WishItemFieldsValues } from "./WishItemFields";
 
+function analyzeButtonLabel(
+  isAnalyzing: boolean,
+  hasAnalysis: boolean
+): string {
+  if (isAnalyzing) return "分析中…";
+  return hasAnalysis ? "再分析" : "分析する";
+}
+
 export function ItemDetailDialog({
   item,
   onPatch,
   onDelete,
+  onAnalyze,
   onClose,
 }: {
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
+  onAnalyze: () => Promise<void>;
   onClose: () => void;
 }) {
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [values, setValues] = useState<WishItemFieldsValues>(() => ({
     name: item.name,
     url: item.url ?? "",
@@ -46,6 +58,19 @@ export function ItemDetailDialog({
     });
   }
 
+  async function handleAnalyze() {
+    if (analyzing) return;
+    setAnalysisError(null);
+    setAnalyzing(true);
+    try {
+      await onAnalyze();
+    } catch (e) {
+      setAnalysisError(e instanceof Error ? e.message : "分析に失敗しました");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   return (
     <div
       role="dialog"
@@ -64,6 +89,40 @@ export function ItemDetailDialog({
           nameRequired
           allowUnset
         />
+
+        <section
+          aria-label="AI 分析"
+          className="mt-4 rounded border border-[var(--notion-border)] bg-neutral-50 p-2.5 dark:bg-white/[0.03]"
+        >
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
+              AI 分析
+            </span>
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={analyzing}
+              className="rounded border border-[var(--notion-border-strong)] px-2 py-0.5 text-[12px] text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 dark:text-neutral-200 dark:hover:bg-white/5"
+            >
+              {analyzeButtonLabel(analyzing, !!item.analysis)}
+            </button>
+          </div>
+          {analysisError && (
+            <p className="mb-1.5 text-[12px] text-rose-600 dark:text-rose-400">
+              {analysisError}
+            </p>
+          )}
+          {item.analysis ? (
+            <pre className="whitespace-pre-wrap break-words font-sans text-[12.5px] leading-relaxed text-neutral-800 dark:text-neutral-200">
+              {item.analysis}
+            </pre>
+          ) : analyzing ? null : (
+            <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+              未分析。ボタンを押すと Claude が「買うべきか」を判定します。
+            </p>
+          )}
+        </section>
+
         <div className="mt-4 flex items-center justify-between">
           <button
             type="button"

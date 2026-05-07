@@ -128,5 +128,34 @@ describe("pageToItem", () => {
     expect(item.priority).toBeNull();
     expect(item.purchaseDate).toBeNull();
     expect(item.memo).toBeNull();
+    expect(item.analysis).toBeNull();
+  });
+
+  it("分析結果プロパティがあれば analysis に読み込む", () => {
+    const item = pageToItem(
+      fixturePage({
+        分析結果: {
+          id: "p8",
+          type: "rich_text",
+          rich_text: [
+            {
+              type: "text",
+              text: { content: "買う\n・優先度高", link: null },
+              plain_text: "買う\n・優先度高",
+              href: null,
+              annotations: {
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+                code: false,
+                color: "default",
+              },
+            },
+          ],
+        },
+      })
+    );
+    expect(item.analysis).toBe("買う\n・優先度高");
   });
 });

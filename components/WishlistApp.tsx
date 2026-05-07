@@ -115,6 +115,19 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
     }
   }
 
+  async function handleAnalyze(id: string) {
+    const res = await fetch(`/api/items/${id}/analyze`, { method: "POST" });
+    const data = (await res.json().catch(() => ({}))) as {
+      item?: WishItem;
+      error?: string;
+    };
+    if (!res.ok || !data.item) {
+      throw new Error(data.error ?? "分析に失敗しました");
+    }
+    const updated = data.item;
+    setItems((curr) => curr.map((it) => (it.id === id ? updated : it)));
+  }
+
   return (
     <div className="space-y-3">
       <Toolbar
@@ -154,6 +167,7 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
         hideTerminalSections={statusFilter === "active"}
         onPatch={handlePatch}
         onDelete={handleDelete}
+        onAnalyze={handleAnalyze}
         onAddInStatus={(s) => setAddState(s)}
       />
     </div>

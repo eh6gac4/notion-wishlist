@@ -22,6 +22,7 @@
     "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.0",
     "@notionhq/client": "^2.2.15",
     "@serwist/next": "^9.5.11",
     "next": "^15.0.0",
