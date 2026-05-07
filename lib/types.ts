@@ -9,6 +9,7 @@ export type WishItem = {
   status: WishStatus | null;
   priority: WishPriority | null;
   purchaseDate: string | null;
+  memo: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -20,6 +21,7 @@ export type WishItemInput = {
   status?: WishStatus | null;
   priority?: WishPriority | null;
   purchaseDate?: string | null;
+  memo?: string | null;
 };
 
 export type WishItemPatch = Partial<WishItemInput>;

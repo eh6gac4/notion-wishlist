@@ -16,6 +16,7 @@ export const PROPS = {
   status: process.env.NOTION_PROP_STATUS ?? "ステータス",
   priority: process.env.NOTION_PROP_PRIORITY ?? "優先度",
   purchaseDate: process.env.NOTION_PROP_PURCHASE_DATE ?? "購入予定日",
+  memo: process.env.NOTION_PROP_MEMO ?? "メモ",
 } as const;
 
 let _client: Client | null = null;
@@ -62,6 +63,7 @@ export function pageToItem(page: PageObjectResponse): WishItem {
     status: readSelect(p[PROPS.status]) as WishItem["status"],
     priority: readSelect(p[PROPS.priority]) as WishItem["priority"],
     purchaseDate: readDateStart(p[PROPS.purchaseDate]),
+    memo: readRichText(p[PROPS.memo]),
     createdAt: page.created_time,
     updatedAt: page.last_edited_time,
   };
@@ -86,6 +88,12 @@ function readSelect(prop: Property | undefined): string | null {
 
 function readDateStart(prop: Property | undefined): string | null {
   return prop?.type === "date" ? prop.date?.start ?? null : null;
+}
+
+function readRichText(prop: Property | undefined): string | null {
+  if (prop?.type !== "rich_text") return null;
+  const text = prop.rich_text.map((t) => t.plain_text).join("");
+  return text || null;
 }
 
 type PropertyValue = NonNullable<CreatePageParameters["properties"]>[string];
@@ -120,6 +128,13 @@ function buildProperties(
     props[PROPS.purchaseDate] = input.purchaseDate
       ? { date: { start: input.purchaseDate } }
       : { date: null };
+  }
+  if (input.memo !== undefined) {
+    props[PROPS.memo] = {
+      rich_text: input.memo
+        ? [{ type: "text", text: { content: input.memo } }]
+        : [],
+    };
   }
   return props;
 }

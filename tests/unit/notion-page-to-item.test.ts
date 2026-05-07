@@ -61,6 +61,26 @@ function fixturePage(
           time_zone: null,
         },
       },
+      メモ: {
+        id: "p7",
+        type: "rich_text",
+        rich_text: [
+          {
+            type: "text",
+            text: { content: "型番要確認", link: null },
+            plain_text: "型番要確認",
+            href: null,
+            annotations: {
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+              color: "default",
+            },
+          },
+        ],
+      },
       ...overrides,
     },
   } as unknown as PageObjectResponse;
@@ -77,6 +97,7 @@ describe("pageToItem", () => {
     expect(item.status).toBe("検討中");
     expect(item.priority).toBe("高");
     expect(item.purchaseDate).toBe("2026-04-01");
+    expect(item.memo).toBe("型番要確認");
     expect(item.createdAt).toBe("2026-01-01T00:00:00.000Z");
     expect(item.updatedAt).toBe("2026-02-01T00:00:00.000Z");
   });
@@ -98,6 +119,7 @@ describe("pageToItem", () => {
         ステータス: { id: "p4", type: "select", select: null },
         優先度: { id: "p5", type: "select", select: null },
         購入予定日: { id: "p6", type: "date", date: null },
+        メモ: { id: "p7", type: "rich_text", rich_text: [] },
       })
     );
     expect(item.url).toBeNull();
@@ -105,5 +127,6 @@ describe("pageToItem", () => {
     expect(item.status).toBeNull();
     expect(item.priority).toBeNull();
     expect(item.purchaseDate).toBeNull();
+    expect(item.memo).toBeNull();
   });
 });
