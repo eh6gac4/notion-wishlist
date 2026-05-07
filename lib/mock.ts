@@ -36,7 +36,6 @@ function seed(store: Store) {
       priority: "高",
       purchaseDate: addDays(now, 14),
       memo: "英語配列・無刻印モデルを優先",
-      analysis: null,
       createdAt: addDays(now, -7),
       updatedAt: addDays(now, -1),
     },
@@ -49,7 +48,6 @@ function seed(store: Store) {
       priority: "中",
       purchaseDate: null,
       memo: null,
-      analysis: null,
       createdAt: addDays(now, -14),
       updatedAt: addDays(now, -3),
     },
@@ -62,7 +60,6 @@ function seed(store: Store) {
       priority: "低",
       purchaseDate: null,
       memo: "ショールームで座り心地を確認してから判断",
-      analysis: null,
       createdAt: addDays(now, -30),
       updatedAt: addDays(now, -5),
     },
@@ -75,7 +72,6 @@ function seed(store: Store) {
       priority: "中",
       purchaseDate: addDays(now, -10),
       memo: null,
-      analysis: null,
       createdAt: addDays(now, -45),
       updatedAt: addDays(now, -10),
     },
@@ -88,7 +84,6 @@ function seed(store: Store) {
       priority: "低",
       purchaseDate: null,
       memo: null,
-      analysis: null,
       createdAt: addDays(now, -20),
       updatedAt: addDays(now, -2),
     },
@@ -127,7 +122,6 @@ export async function createItemMock(
     priority: input.priority ?? null,
     purchaseDate: input.purchaseDate ?? null,
     memo: input.memo ?? null,
-    analysis: input.analysis ?? null,
     createdAt: now,
     updatedAt: now,
   };
@@ -157,9 +151,6 @@ export async function updateItemMock(
       ? { purchaseDate: patch.purchaseDate ?? null }
       : {}),
     ...(patch.memo !== undefined ? { memo: patch.memo ?? null } : {}),
-    ...(patch.analysis !== undefined
-      ? { analysis: patch.analysis ?? null }
-      : {}),
     updatedAt: new Date().toISOString(),
   };
   store.items.set(id, updated);
@@ -171,20 +162,18 @@ export async function archiveItemMock(id: string): Promise<void> {
   store.items.delete(id);
 }
 
-export async function analyzeItemMock(id: string): Promise<WishItem> {
+export async function analyzeItemMock(
+  id: string
+): Promise<{ analysis: string; analyzedAt: string }> {
   const store = getStore();
   const existing = store.items.get(id);
   if (!existing) {
     throw new Error(`item not found: ${id}`);
   }
-  const text = cannedAnalysis(existing);
-  const updated: WishItem = {
-    ...existing,
-    analysis: text,
-    updatedAt: new Date().toISOString(),
+  return {
+    analysis: cannedAnalysis(existing),
+    analyzedAt: new Date().toISOString(),
   };
-  store.items.set(id, updated);
-  return updated;
 }
 
 function cannedAnalysis(item: WishItem): string {

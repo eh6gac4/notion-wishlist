@@ -1,15 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { WishItem, WishItemPatch } from "@/lib/types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemPatch,
+} from "@/lib/types";
 import { WishItemFields, type WishItemFieldsValues } from "./WishItemFields";
 
 function analyzeButtonLabel(
   isAnalyzing: boolean,
-  hasAnalysis: boolean
+  hasResult: boolean
 ): string {
   if (isAnalyzing) return "分析中…";
-  return hasAnalysis ? "再分析" : "分析する";
+  return hasResult ? "再分析" : "分析する";
+}
+
+function formatAnalyzedAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export function ItemDetailDialog({
@@ -22,11 +33,12 @@ export function ItemDetailDialog({
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
-  onAnalyze: () => Promise<void>;
+  onAnalyze: () => Promise<AnalysisResult>;
   onClose: () => void;
 }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [latest, setLatest] = useState<AnalysisResult | null>(null);
   const [values, setValues] = useState<WishItemFieldsValues>(() => ({
     name: item.name,
     url: item.url ?? "",
@@ -63,7 +75,7 @@ export function ItemDetailDialog({
     setAnalysisError(null);
     setAnalyzing(true);
     try {
-      await onAnalyze();
+      setLatest(await onAnalyze());
     } catch (e) {
       setAnalysisError(e instanceof Error ? e.message : "分析に失敗しました");
     } finally {
@@ -104,7 +116,7 @@ export function ItemDetailDialog({
               disabled={analyzing}
               className="rounded border border-[var(--notion-border-strong)] px-2 py-0.5 text-[12px] text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 dark:text-neutral-200 dark:hover:bg-white/5"
             >
-              {analyzeButtonLabel(analyzing, !!item.analysis)}
+              {analyzeButtonLabel(analyzing, !!latest)}
             </button>
           </div>
           {analysisError && (
@@ -112,13 +124,18 @@ export function ItemDetailDialog({
               {analysisError}
             </p>
           )}
-          {item.analysis ? (
-            <pre className="whitespace-pre-wrap break-words font-sans text-[12.5px] leading-relaxed text-neutral-800 dark:text-neutral-200">
-              {item.analysis}
-            </pre>
+          {latest ? (
+            <>
+              <p className="mb-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                {formatAnalyzedAt(latest.analyzedAt)}・Notion ページ本文に追記済み
+              </p>
+              <pre className="whitespace-pre-wrap break-words font-sans text-[12.5px] leading-relaxed text-neutral-800 dark:text-neutral-200">
+                {latest.analysis}
+              </pre>
+            </>
           ) : analyzing ? null : (
             <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
-              未分析。ボタンを押すと Claude が「買うべきか」を判定します。
+              未分析。ボタンを押すと Claude が判定し、Notion ページ本文に追記します。過去の分析履歴は Notion 側で確認できます。
             </p>
           )}
         </section>

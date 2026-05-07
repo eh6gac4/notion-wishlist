@@ -10,8 +10,8 @@ export async function POST(
 ) {
   const { id } = await ctx.params;
   try {
-    const item = await analyzeItem(id);
-    return NextResponse.json({ item });
+    const result = await analyzeItem(id);
+    return NextResponse.json(result);
   } catch (e) {
     return NextResponse.json({ error: errorMessage(e) }, { status: 502 });
   }

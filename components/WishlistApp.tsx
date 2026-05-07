@@ -8,6 +8,7 @@ import type {
   WishStatus,
 } from "@/lib/types";
 import { PRIORITIES, TERMINAL_STATUSES } from "@/lib/types";
+import type { AnalysisResult } from "@/lib/types";
 import { Toolbar } from "./Toolbar";
 import type { StatusFilter, SortKey } from "./Toolbar";
 import { ListView } from "./ListView";
@@ -115,17 +116,15 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
     }
   }
 
-  async function handleAnalyze(id: string) {
+  async function handleAnalyze(id: string): Promise<AnalysisResult> {
     const res = await fetch(`/api/items/${id}/analyze`, { method: "POST" });
-    const data = (await res.json().catch(() => ({}))) as {
-      item?: WishItem;
-      error?: string;
-    };
-    if (!res.ok || !data.item) {
+    const data = (await res.json().catch(() => ({}))) as Partial<
+      AnalysisResult & { error: string }
+    >;
+    if (!res.ok || !data.analysis || !data.analyzedAt) {
       throw new Error(data.error ?? "分析に失敗しました");
     }
-    const updated = data.item;
-    setItems((curr) => curr.map((it) => (it.id === id ? updated : it)));
+    return { analysis: data.analysis, analyzedAt: data.analyzedAt };
   }
 
   return (

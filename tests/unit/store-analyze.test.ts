@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe("analyzeItem (mock mode)", () => {
-  it("分析結果文字列が analysis フィールドに保存される", async () => {
+  it("分析テキストと分析時刻を返す", async () => {
     const created = await createItem({
       name: "テスト商品",
       price: 5000,
@@ -21,11 +21,10 @@ describe("analyzeItem (mock mode)", () => {
       status: "検討中",
       memo: "代替案を比較中",
     });
-    expect(created.analysis).toBeNull();
 
-    const analyzed = await analyzeItem(created.id);
-    expect(analyzed.analysis).toBeTruthy();
-    expect(analyzed.analysis).toMatch(/買う|見送る|保留/);
+    const result = await analyzeItem(created.id);
+    expect(result.analysis).toMatch(/買う|見送る|保留/);
+    expect(result.analyzedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   it("優先度「高」のときは結論が「買う」になる", async () => {
@@ -34,8 +33,8 @@ describe("analyzeItem (mock mode)", () => {
       price: 1000,
       priority: "高",
     });
-    const analyzed = await analyzeItem(created.id);
-    expect(analyzed.analysis?.split("\n")[0]).toBe("買う");
+    const result = await analyzeItem(created.id);
+    expect(result.analysis.split("\n")[0]).toBe("買う");
   });
 
   it("存在しない id はエラーを投げる", async () => {

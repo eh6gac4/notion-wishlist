@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { WishItem, WishItemPatch, WishStatus } from "@/lib/types";
+import type {
+  AnalysisResult,
+  WishItem,
+  WishItemPatch,
+  WishStatus,
+} from "@/lib/types";
 import { STATUSES, TERMINAL_STATUSES } from "@/lib/types";
 import { PriorityText, StatusDot } from "./Pill";
 import { StatusMenu } from "./StatusMenu";
@@ -19,7 +24,7 @@ export function ListView({
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
-  onAnalyze: (id: string) => Promise<void>;
+  onAnalyze: (id: string) => Promise<AnalysisResult>;
   onAddInStatus: (status: WishStatus) => void;
   groupByStatus: boolean;
   hideTerminalSections?: boolean;
@@ -103,7 +108,7 @@ function Section({
   items: WishItem[];
   onPatch: (id: string, patch: WishItemPatch) => void;
   onDelete: (id: string) => void;
-  onAnalyze: (id: string) => Promise<void>;
+  onAnalyze: (id: string) => Promise<AnalysisResult>;
   onAdd?: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(
@@ -178,7 +183,7 @@ function Row({
   item: WishItem;
   onPatch: (patch: WishItemPatch) => void;
   onDelete: () => void;
-  onAnalyze: () => Promise<void>;
+  onAnalyze: () => Promise<AnalysisResult>;
 }) {
   const [open, setOpen] = useState(false);
   const hasMeta =

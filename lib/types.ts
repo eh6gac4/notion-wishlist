@@ -10,7 +10,6 @@ export type WishItem = {
   priority: WishPriority | null;
   purchaseDate: string | null;
   memo: string | null;
-  analysis: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -23,10 +22,11 @@ export type WishItemInput = {
   priority?: WishPriority | null;
   purchaseDate?: string | null;
   memo?: string | null;
-  analysis?: string | null;
 };
 
 export type WishItemPatch = Partial<WishItemInput>;
+
+export type AnalysisResult = { analysis: string; analyzedAt: string };
 
 export const STATUSES: WishStatus[] = [
   "検討中",

@@ -28,6 +28,10 @@ test.describe("AI 分析機能", () => {
     await expect(
       analysisSection.getByText(/買う|見送る|保留/)
     ).toBeVisible();
+    // 追記済みのアナウンスが出る
+    await expect(
+      analysisSection.getByText("Notion ページ本文に追記済み", { exact: false })
+    ).toBeVisible();
     // ボタンは「再分析」に変わる
     await expect(
       analysisSection.getByRole("button", { name: "再分析" })

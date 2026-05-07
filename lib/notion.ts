@@ -3,6 +3,7 @@ import type {
   PageObjectResponse,
   CreatePageParameters,
   UpdatePageParameters,
+  AppendBlockChildrenParameters,
 } from "@notionhq/client/build/src/api-endpoints";
 import type { WishItem, WishItemInput, WishItemPatch } from "./types";
 
@@ -17,7 +18,6 @@ export const PROPS = {
   priority: process.env.NOTION_PROP_PRIORITY ?? "優先度",
   purchaseDate: process.env.NOTION_PROP_PURCHASE_DATE ?? "購入予定日",
   memo: process.env.NOTION_PROP_MEMO ?? "メモ",
-  analysis: process.env.NOTION_PROP_ANALYSIS ?? "分析結果",
 } as const;
 
 let _client: Client | null = null;
@@ -65,7 +65,6 @@ export function pageToItem(page: PageObjectResponse): WishItem {
     priority: readSelect(p[PROPS.priority]) as WishItem["priority"],
     purchaseDate: readDateStart(p[PROPS.purchaseDate]),
     memo: readRichText(p[PROPS.memo]),
-    analysis: readRichText(p[PROPS.analysis]),
     createdAt: page.created_time,
     updatedAt: page.last_edited_time,
   };
@@ -138,13 +137,6 @@ function buildProperties(
         : [],
     };
   }
-  if (input.analysis !== undefined) {
-    props[PROPS.analysis] = {
-      rich_text: input.analysis
-        ? [{ type: "text", text: { content: input.analysis } }]
-        : [],
-    };
-  }
   return props;
 }
 
@@ -210,4 +202,60 @@ export async function updateItem(
 export async function archiveItem(id: string): Promise<void> {
   const notion = getNotion();
   await notion.pages.update({ page_id: id, archived: true });
+}
+
+type BlockChild = AppendBlockChildrenParameters["children"][number];
+
+export function buildAnalysisBlocks(
+  text: string,
+  analyzedAt: Date
+): BlockChild[] {
+  const heading = `🤖 AI 分析（${formatTimestampJa(analyzedAt)}）`;
+  const blocks: BlockChild[] = [
+    { type: "divider", divider: {} },
+    {
+      type: "heading_3",
+      heading_3: {
+        rich_text: [{ type: "text", text: { content: heading } }],
+      },
+    },
+  ];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const bullet = line.match(/^[・\-•]\s*(.+)$/);
+    if (bullet) {
+      blocks.push({
+        type: "bulleted_list_item",
+        bulleted_list_item: {
+          rich_text: [{ type: "text", text: { content: bullet[1] } }],
+        },
+      });
+    } else {
+      blocks.push({
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: line } }],
+        },
+      });
+    }
+  }
+  return blocks;
+}
+
+export async function appendAnalysisBlocks(
+  pageId: string,
+  text: string,
+  analyzedAt: Date
+): Promise<void> {
+  const notion = getNotion();
+  await notion.blocks.children.append({
+    block_id: pageId,
+    children: buildAnalysisBlocks(text, analyzedAt),
+  });
+}
+
+function formatTimestampJa(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

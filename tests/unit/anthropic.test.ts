@@ -12,7 +12,6 @@ function makeItem(overrides: Partial<WishItem> = {}): WishItem {
     priority: null,
     purchaseDate: null,
     memo: null,
-    analysis: null,
     createdAt: "2026-04-01T00:00:00.000Z",
     updatedAt: "2026-04-01T00:00:00.000Z",
     ...overrides,
