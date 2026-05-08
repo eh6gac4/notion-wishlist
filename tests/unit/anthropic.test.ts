@@ -44,6 +44,12 @@ describe("buildAnalysisPrompt", () => {
     expect(prompt).toContain("登録からの経過日数: 10日");
   });
 
+  it("今日の日付を Asia/Tokyo の YYYY-MM-DD で含める", () => {
+    const now = new Date("2026-05-07T03:00:00.000Z");
+    const prompt = buildAnalysisPrompt(makeItem(), now);
+    expect(prompt).toContain("今日の日付: 2026-05-07");
+  });
+
   it("出力フォーマット指示と判定語彙が含まれている", () => {
     const prompt = buildAnalysisPrompt(makeItem());
     expect(prompt).toContain("出力フォーマット");

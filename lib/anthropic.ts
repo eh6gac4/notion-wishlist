@@ -24,7 +24,10 @@ export function buildAnalysisPrompt(
   item: WishItem,
   now: Date = new Date()
 ): string {
-  const lines: string[] = [`品名: ${item.name}`];
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+  }).format(now);
+  const lines: string[] = [`今日の日付: ${today}`, `品名: ${item.name}`];
   if (item.price !== null) {
     lines.push(`価格: ¥${item.price.toLocaleString("ja-JP")}`);
   }
