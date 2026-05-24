@@ -35,8 +35,9 @@ export function ListView({
     for (const s of STATUSES) groups.set(s, []);
     groups.set("未設定", []);
     for (const it of items) {
-      const key = (it.status ?? "未設定") as WishStatus | "未設定";
-      groups.get(key)!.push(it);
+      const rawKey = (it.status ?? "未設定") as WishStatus | "未設定";
+      const bucket = groups.get(rawKey) ?? groups.get("未設定")!;
+      bucket.push(it);
     }
     const visibleStatuses = hideTerminalSections
       ? STATUSES.filter((s) => !TERMINAL_STATUSES.includes(s))
