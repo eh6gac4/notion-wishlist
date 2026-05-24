@@ -1,7 +1,6 @@
 "use client";
 
 import type { Ref } from "react";
-import { X } from "lucide-react";
 import type { WishPriority, WishStatus } from "@/lib/types";
 import { PRIORITIES, STATUSES } from "@/lib/types";
 import { Field, inputCls } from "./Field";
@@ -59,7 +58,18 @@ export function WishItemFields({
               aria-label="URL をクリア"
               className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-neutral-400 hover:text-neutral-700 focus:text-neutral-700 focus:outline-none dark:hover:text-neutral-200 dark:focus:text-neutral-200"
             >
-              <X size={14} />
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M4 4 L12 12 M12 4 L4 12" />
+              </svg>
             </button>
           )}
         </div>
