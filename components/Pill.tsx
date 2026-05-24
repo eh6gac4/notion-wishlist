@@ -2,6 +2,7 @@ import type { WishPriority, WishStatus } from "@/lib/types";
 
 const STATUS_DOT: Record<WishStatus | "未設定", string> = {
   検討中: "bg-amber-400",
+  保留: "bg-sky-400",
   購入予定: "bg-violet-500",
   購入済み: "bg-emerald-500",
   却下: "bg-neutral-400",
