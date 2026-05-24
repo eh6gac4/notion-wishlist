@@ -30,9 +30,9 @@ export type AnalysisResult = { analysis: string; analyzedAt: string };
 
 export const STATUSES: WishStatus[] = [
   "検討中",
-  "保留",
   "購入予定",
   "購入済み",
+  "保留",
   "却下",
 ];
 export const PRIORITIES: WishPriority[] = ["高", "中", "低"];

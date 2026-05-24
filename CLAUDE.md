@@ -47,7 +47,7 @@ CI（`.github/workflows/ci.yml`）は PR ごとに `verify`（typecheck → test
 
 ### Notion プロパティのマッピング
 
-`lib/types.ts` に `WishItem` と日本語の選択肢ラベル（`STATUSES = ["検討中", "保留", "購入予定", "購入済み", "却下"]`、`PRIORITIES = ["高", "中", "低"]`）がハードコードされている。実 Notion DB の選択肢名が違う場合はこの定数を変える — 文字列はそのまま Notion API に流れる。
+`lib/types.ts` に `WishItem` と日本語の選択肢ラベル（`STATUSES = ["検討中", "購入予定", "購入済み", "保留", "却下"]`、`PRIORITIES = ["高", "中", "低"]`）がハードコードされている。実 Notion DB の選択肢名が違う場合はこの定数を変える — 文字列はそのまま Notion API に流れる。
 
 `lib/notion.ts` が `WishItem` ↔ Notion `PageObjectResponse` を変換する。プロパティ名のデフォルトは日本語（`品名`, `URL`, `価格`, `ステータス`, `優先度`, `購入予定日`）だが、それぞれ `NOTION_PROP_*` 環境変数で上書きできる（`PROPS` を参照）。アーカイブは `pages.update({ archived: true })` で、完全削除ではない。
 
