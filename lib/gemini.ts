@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import type { WishItem } from "./types";
 
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash";
 
 let _client: GoogleGenAI | null = null;
 
