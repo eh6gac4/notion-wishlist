@@ -38,6 +38,7 @@ export function buildAnalysisPrompt(
   if (item.memo) lines.push(`メモ: ${item.memo}`);
 
   return [
+    `現在の日付: ${now.toLocaleDateString("ja-JP")}`,
     "あなたはユーザーの「ほしいものリスト」のアイテムを分析し、買うべきかをアドバイスするアシスタントです。",
     "以下のアイテム情報を踏まえ、買うべきか・見送るべきかを判断してください。",
     "",
