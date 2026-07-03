@@ -154,7 +154,7 @@ export function ItemDetailDialog({
           ) : analyses.length === 0 ? (
             analyzing ? null : (
               <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
-                未分析。ボタンを押すと Claude が判定し、Notion ページ本文に追記します。
+                未分析。ボタンを押すと Gemini が判定し、Notion ページ本文に追記します。
               </p>
             )
           ) : (
