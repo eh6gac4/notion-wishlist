@@ -47,8 +47,8 @@ export async function archiveItem(id: string): Promise<void> {
 
 export async function analyzeItem(id: string): Promise<AnalysisResult> {
   if (isMockMode()) return analyzeItemMock(id);
-  // dynamic import で @anthropic-ai/sdk を analyze 経路だけに閉じ込め、他 Route の Workers バンドル肥大化を避ける。
-  const { analyzeWishItem } = await import("./anthropic");
+  // dynamic import で @google/genai を analyze 経路だけに閉じ込め、他 Route の Workers バンドル肥大化を避ける。
+  const { analyzeWishItem } = await import("./gemini");
   const item = await notionGet(id);
   const analysis = await analyzeWishItem(item);
   const analyzedAt = formatTimestampJa(new Date());

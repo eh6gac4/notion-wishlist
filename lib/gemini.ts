@@ -1,21 +1,17 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import type { WishItem } from "./types";
 
-const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 
-let _client: Anthropic | null = null;
+let _client: GoogleGenAI | null = null;
 
-export function getAnthropic(): Anthropic {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+export function getGemini(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY is not set");
+    throw new Error("GEMINI_API_KEY is not set");
   }
   if (!_client) {
-    // Workers の nodejs_compat では SDK 既定の経路が落ちるためグローバル fetch を渡す。
-    _client = new Anthropic({
-      apiKey,
-      fetch: (url, init) => globalThis.fetch(url, init),
-    });
+    _client = new GoogleGenAI({ apiKey });
   }
   return _client;
 }
@@ -55,18 +51,18 @@ export function buildAnalysisPrompt(
 }
 
 export async function analyzeWishItem(item: WishItem): Promise<string> {
-  const client = getAnthropic();
-  const model = process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
-  const res = await client.messages.create({
+  const client = getGemini();
+  const model = process.env.GEMINI_MODEL ?? DEFAULT_MODEL;
+  
+  const res = await client.models.generateContent({
     model,
-    max_tokens: 600,
-    messages: [{ role: "user", content: buildAnalysisPrompt(item) }],
+    contents: buildAnalysisPrompt(item),
+    config: {
+      maxOutputTokens: 600,
+    }
   });
-  const text = res.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("\n")
-    .trim();
+  
+  const text = res.text?.trim();
   if (!text) throw new Error("分析結果が空でした");
   return text;
 }

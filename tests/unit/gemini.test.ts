@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAnalysisPrompt } from "@/lib/anthropic";
+import { buildAnalysisPrompt } from "@/lib/gemini";
 import type { WishItem } from "@/lib/types";
 
 function makeItem(overrides: Partial<WishItem> = {}): WishItem {
