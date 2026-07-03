@@ -81,3 +81,8 @@ SW の挙動を変える時は `serwist.skipWaiting + clientsClaim` の効果で
 - テスト配置: `tests/unit/**/*.test.{ts,tsx}`（vitest, jsdom）と `tests/e2e/**/*.spec.ts`（playwright）。`@/*` エイリアスはリポジトリルートを指す（vitest と tsconfig 両方）。
 - pre-commit フック失敗時は **新しいコミット**で修正する。`--amend` しない（CONTRIBUTING.md §7）。
 - `/simplify` スキルは公式ワークフローの一部 — テストを書く前に変更ファイルに対して走らせる（CONTRIBUTING.md と PR テンプレ参照）。
+
+## 開発時の注意点
+
+- **秘匿ファイルの取り扱い**: `.env.local` などのローカル環境変数ファイルに対して `cp .env.example .env.local` のような上書き操作を絶対に行わない。編集時は必ず中身を確認し、差分のみを追記すること。
+- **AI連携時のプロンプト**: AIモデル（LLM）は現在時刻を正しく認識できないため、プロンプトには必ずアプリケーション側で取得した「現在の日付」を明示的に埋め込むこと。
