@@ -84,7 +84,7 @@ USE_MOCK_DATA=0   # Notion を使う（トークン未設定だとエラー）
 ダイアログを開くと過去の分析履歴を Notion から読み出して新しい順に表示します。
 
 - 環境変数 `GEMINI_API_KEY` を設定（モックモード時は未設定でもダミー分析が返る）
-- モデルは既定で `gemini-2.5-flash`。`GEMINI_MODEL` で上書き可能
+- モデルは既定で `gemini-3.5-flash`。`GEMINI_MODEL` で上書き可能
 - Cloudflare Workers では `npm run cf:secret -- GEMINI_API_KEY` で secret として登録
 - 分析結果は Notion ページ本文に書き込むため、Notion インテグレーションに対象 DB の編集権限が必要です
 
