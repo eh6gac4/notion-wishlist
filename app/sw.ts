@@ -7,6 +7,7 @@ import {
   CacheFirst,
   ExpirationPlugin,
   NetworkFirst,
+  StaleWhileRevalidate,
   Serwist,
 } from "serwist";
 
@@ -23,9 +24,8 @@ const apiItemsCaching: RuntimeCaching = {
     sameOrigin &&
     request.method === "GET" &&
     url.pathname.startsWith("/api/items"),
-  handler: new NetworkFirst({
+  handler: new StaleWhileRevalidate({
     cacheName: "wishlist-api",
-    networkTimeoutSeconds: 5,
     plugins: [
       new CacheableResponsePlugin({ statuses: [200] }),
       new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 60 }),
