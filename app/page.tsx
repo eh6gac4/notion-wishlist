@@ -5,7 +5,7 @@ export default function Page() {
   const mock = isMockMode();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
+    <main className="mx-auto max-w-3xl px-6 pwa-pt pwa-pb">
       <header className="mb-4 flex items-baseline gap-2">
         <h1 className="text-[22px] font-semibold tracking-tight">🛒 Wishlist</h1>
         {mock && (
