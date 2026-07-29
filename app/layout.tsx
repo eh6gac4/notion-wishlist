@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import InstallPrompt from "@/components/InstallPrompt";
+import AppleSplashScreens from "@/components/AppleSplashScreens";
 
 export const metadata: Metadata = {
   applicationName: "Wishlist",
@@ -43,9 +45,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
+      <head>
+        <AppleSplashScreens />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         {children}
         <ServiceWorkerRegister />
+        <InstallPrompt />
       </body>
     </html>
   );
