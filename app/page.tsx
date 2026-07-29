@@ -1,19 +1,8 @@
-import { listItems, isMockMode } from "@/lib/store";
+import { isMockMode } from "@/lib/store";
 import { WishlistApp } from "@/components/WishlistApp";
-import type { WishItem } from "@/lib/types";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-export default async function Page() {
-  let items: WishItem[] = [];
-  let error: string | null = null;
+export default function Page() {
   const mock = isMockMode();
-  try {
-    items = await listItems();
-  } catch (e) {
-    error = e instanceof Error ? e.message : "unknown error";
-  }
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -26,14 +15,7 @@ export default async function Page() {
         )}
       </header>
 
-      {error ? (
-        <div className="rounded-md border border-rose-300 bg-rose-50 p-4 text-[13px] text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
-          <p className="font-semibold">読み込みに失敗しました</p>
-          <p className="mt-1 break-all">{error}</p>
-        </div>
-      ) : (
-        <WishlistApp initialItems={items} />
-      )}
+      <WishlistApp />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import type {
   WishItem,
   WishItemInput,
@@ -14,14 +14,35 @@ import type { StatusFilter, SortKey } from "./Toolbar";
 import { ListView } from "./ListView";
 import { AddItemForm, type AddState } from "./AddItemForm";
 
-export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
-  const [items, setItems] = useState<WishItem[]>(initialItems);
+export function WishlistApp() {
+  const [items, setItems] = useState<WishItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [sort, setSort] = useState<SortKey>("priority");
   const [query, setQuery] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [addState, setAddState] = useState<AddState>(null);
+
+  useEffect(() => {
+    async function loadItems() {
+      try {
+        const res = await fetch("/api/items");
+        if (!res.ok) {
+          throw new Error("アイテムの読み込みに失敗しました");
+        }
+        const data = await res.json();
+        if (data.items) {
+          setItems(data.items);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "読み込みエラーが発生しました");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadItems();
+  }, []);
 
   const groupByStatus = statusFilter === "all" || statusFilter === "active";
 
@@ -160,15 +181,19 @@ export function WishlistApp({ initialItems }: { initialItems: WishItem[] }) {
         }
       />
 
-      <ListView
-        items={visible}
-        groupByStatus={groupByStatus}
-        hideTerminalSections={statusFilter === "active"}
-        onPatch={handlePatch}
-        onDelete={handleDelete}
-        onAnalyze={handleAnalyze}
-        onAddInStatus={(s) => setAddState(s)}
-      />
+      {isLoading ? (
+        <SkeletonList />
+      ) : (
+        <ListView
+          items={visible}
+          groupByStatus={groupByStatus}
+          hideTerminalSections={statusFilter === "active"}
+          onPatch={handlePatch}
+          onDelete={handleDelete}
+          onAnalyze={handleAnalyze}
+          onAddInStatus={(s) => setAddState(s)}
+        />
+      )}
     </div>
   );
 }
@@ -177,4 +202,21 @@ function priorityIndex(p: WishItem["priority"]): number {
   if (!p) return 99;
   const i = PRIORITIES.indexOf(p);
   return i === -1 ? 99 : i;
+}
+
+function SkeletonList() {
+  return (
+    <div className="space-y-4 mt-6">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="flex flex-col gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm animate-pulse">
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
+          <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mt-2"></div>
+          <div className="flex gap-2 mt-4">
+            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
