@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .pwa-pt {
+    padding-top: max(calc(env(safe-area-inset-top) + 1rem), 2.5rem);
+  }
+  .pwa-pb {
+    padding-bottom: max(calc(env(safe-area-inset-bottom) + 1rem), 2.5rem);
+  }
+}
+
 :root {
   color-scheme: light dark;
   --notion-border: rgba(55, 53, 47, 0.09);

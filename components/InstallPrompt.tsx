@@ -48,7 +48,10 @@ export default function InstallPrompt() {
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg rounded-xl p-4 flex flex-col gap-3 z-50">
+    <div
+      className="fixed left-4 right-4 md:left-auto md:right-4 md:w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg rounded-xl p-4 flex flex-col gap-3 z-50"
+      style={{ bottom: "max(calc(env(safe-area-inset-bottom) + 1rem), 1rem)" }}
+    >
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm font-semibold text-slate-900 dark:text-white">アプリとしてインストール</h3>
