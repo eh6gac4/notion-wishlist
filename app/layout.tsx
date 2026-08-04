@@ -1,8 +1,16 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
+import { DotGothic16 } from "next/font/google";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppleSplashScreens from "@/components/AppleSplashScreens";
+
+const dotGothic16 = DotGothic16({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dot",
+});
 
 export const metadata: Metadata = {
   applicationName: "Wishlist",
@@ -44,11 +52,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={dotGothic16.variable}>
       <head>
         <AppleSplashScreens />
       </head>
-      <body className="min-h-screen font-sans antialiased">
+      <body className="min-h-screen font-sans">
         {children}
         <ServiceWorkerRegister />
         <InstallPrompt />

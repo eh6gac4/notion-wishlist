@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { WishStatus } from "@/lib/types";
 import { STATUSES } from "@/lib/types";
 import { StatusDot } from "./Pill";
+import { btnIcon, menuCls, rowHover } from "@/lib/styles";
 
 export function StatusMenu({
   value,
@@ -37,7 +38,7 @@ export function StatusMenu({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-7 w-7 items-center justify-center rounded transition hover:bg-neutral-100 dark:hover:bg-white/5"
+        className={btnIcon}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`ステータス: ${label}`}
@@ -48,7 +49,7 @@ export function StatusMenu({
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-20 mt-1 min-w-[140px] rounded-md border border-[var(--notion-border-strong)] bg-white p-1 shadow-md dark:bg-[#252525]"
+          className={`absolute left-0 top-full z-20 mt-1 min-w-[140px] ${menuCls}`}
         >
           {STATUSES.map((s) => (
             <button
@@ -59,13 +60,13 @@ export function StatusMenu({
                 onChange(s);
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded px-2.5 py-2 text-left text-[13px] hover:bg-neutral-100 dark:hover:bg-white/5"
+              className={`flex w-full items-center gap-2 px-2.5 py-2 text-left text-sm ${rowHover}`}
             >
               <StatusDot status={s} />
               {s}
             </button>
           ))}
-          <div className="my-1 border-t border-[var(--notion-border)]" />
+          <div className="my-1 border-t-2 border-fc-ink" />
           <button
             type="button"
             role="menuitem"
@@ -73,7 +74,7 @@ export function StatusMenu({
               onChange(null);
               setOpen(false);
             }}
-            className="flex w-full items-center rounded px-2.5 py-2 text-left text-[12px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
+            className={`flex w-full items-center px-2.5 py-2 text-left text-xs text-[var(--fc-muted)] ${rowHover}`}
           >
             未設定
           </button>

@@ -7,6 +7,7 @@ import type {
   WishItemPatch,
 } from "@/lib/types";
 import { WishItemFields, type WishItemFieldsValues } from "./WishItemFields";
+import { btnGhost, btnPrimary, cardCls, panelCls } from "@/lib/styles";
 
 function analyzeButtonLabel(
   isAnalyzing: boolean,
@@ -111,13 +112,13 @@ export function ItemDetailDialog({
       role="dialog"
       aria-modal="true"
       aria-label="項目の詳細"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-fc-ink/70 px-4 py-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-[var(--notion-border-strong)] bg-white p-4 shadow-lg dark:bg-[#202020]">
-        <h2 className="mb-3 text-[14px] font-medium">詳細</h2>
+      <div className={`max-h-[90vh] w-full max-w-md overflow-y-auto p-4 shadow-lg ${cardCls}`}>
+        <h2 className="mb-3 text-lg">詳細</h2>
         <WishItemFields
           values={values}
           onChange={(next) => setValues((v) => ({ ...v, ...next }))}
@@ -125,35 +126,26 @@ export function ItemDetailDialog({
           allowUnset
         />
 
-        <section
-          aria-label="AI 分析"
-          className="mt-4 rounded border border-[var(--notion-border)] bg-neutral-50 p-2.5 dark:bg-white/[0.03]"
-        >
+        <section aria-label="AI 分析" className={`mt-4 ${panelCls}`}>
           <div className="mb-1.5 flex items-center justify-between gap-2">
-            <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">
-              AI 分析
-            </span>
+            <span className="text-xs">AI 分析</span>
             <button
               type="button"
               onClick={handleAnalyze}
               disabled={analyzing}
-              className="rounded border border-[var(--notion-border-strong)] px-2 py-0.5 text-[12px] text-neutral-700 hover:bg-neutral-100 disabled:opacity-50 dark:text-neutral-200 dark:hover:bg-white/5"
+              className={`${btnGhost} px-2 py-0.5 text-xs`}
             >
               {analyzeButtonLabel(analyzing, (analyses?.length ?? 0) > 0)}
             </button>
           </div>
           {analysisError && (
-            <p className="mb-1.5 text-[12px] text-rose-600 dark:text-rose-400">
-              {analysisError}
-            </p>
+            <p className="mb-1.5 text-xs text-fc-red">{analysisError}</p>
           )}
           {analyses === null ? (
-            <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
-              履歴を読み込み中…
-            </p>
+            <p className="text-xs text-[var(--fc-muted)]">履歴を読み込み中…</p>
           ) : analyses.length === 0 ? (
             analyzing ? null : (
-              <p className="text-[12px] text-neutral-500 dark:text-neutral-400">
+              <p className="text-xs text-[var(--fc-muted)]">
                 未分析。ボタンを押すと Gemini が判定し、Notion ページ本文に追記します。
               </p>
             )
@@ -162,13 +154,13 @@ export function ItemDetailDialog({
               {[...analyses].reverse().map((entry, i) => (
                 <li
                   key={`${entry.analyzedAt}-${i}`}
-                  className="rounded border border-[var(--notion-border)] bg-white p-2 dark:bg-white/[0.02]"
+                  className="border-2 border-fc-ink bg-[var(--fc-surface)] p-2"
                 >
-                  <p className="mb-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                  <p className="mb-1 text-xs text-[var(--fc-muted)]">
                     {entry.analyzedAt}
                     {i === 0 && analyses.length > 1 ? "（最新）" : ""}
                   </p>
-                  <pre className="whitespace-pre-wrap break-words font-sans text-[12.5px] leading-relaxed text-neutral-800 dark:text-neutral-200">
+                  <pre className="whitespace-pre-wrap break-words font-sans text-xs leading-relaxed">
                     {entry.analysis}
                   </pre>
                 </li>
@@ -181,7 +173,7 @@ export function ItemDetailDialog({
           <button
             type="button"
             onClick={onDelete}
-            className="rounded px-2 py-1 text-[12px] text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+            className={`${btnPrimary} px-2 py-1 text-xs`}
           >
             削除
           </button>
@@ -189,7 +181,7 @@ export function ItemDetailDialog({
             <button
               type="button"
               onClick={onClose}
-              className="rounded px-3 py-1.5 text-[13px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
+              className={`${btnGhost} px-3 py-1.5 text-sm`}
             >
               キャンセル
             </button>
@@ -197,7 +189,7 @@ export function ItemDetailDialog({
               type="button"
               onClick={handleSave}
               disabled={!values.name.trim()}
-              className="rounded bg-neutral-900 px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-neutral-700 disabled:opacity-50 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+              className={`${btnPrimary} px-3.5 py-1.5 text-sm`}
             >
               保存
             </button>
