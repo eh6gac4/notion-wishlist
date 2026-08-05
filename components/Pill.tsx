@@ -20,7 +20,7 @@ export function StatusDot({ status }: { status: WishStatus | null }) {
   const key = status ?? "未設定";
   return (
     <span
-      className={`inline-block h-2 w-2 border-2 border-fc-ink ${STATUS_DOT[key]}`}
+      className={`inline-block h-2 w-2 ${STATUS_DOT[key]}`}
       aria-label={key}
     />
   );
