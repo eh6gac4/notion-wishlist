@@ -36,7 +36,7 @@ const config: Config = {
     extend: {
       colors: {
         fc: {
-          ink: "#101010",
+          ink: "var(--fc-ink)",
           paper: "#FCFCFC",
           gray: "#BCBCBC",
           graydk: "#7C7C7C",
@@ -75,6 +75,9 @@ const config: Config = {
         DEFAULT: "100ms",
       },
     },
+  },
+  future: {
+    hoverOnlyWhenSupported: true,
   },
   plugins: [],
 };

@@ -137,7 +137,7 @@ function Section({
           <button
             type="button"
             onClick={onAdd}
-            className={`p-1 text-[var(--fc-muted)] opacity-0 group-hover:opacity-100 ${rowHover}`}
+            className={`p-1 text-[var(--fc-muted)] opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100 ${rowHover}`}
             aria-label="このステータスに追加"
             title="このステータスに追加"
           >
