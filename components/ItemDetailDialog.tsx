@@ -112,7 +112,7 @@ export function ItemDetailDialog({
       role="dialog"
       aria-modal="true"
       aria-label="項目の詳細"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-fc-ink/70 px-4 py-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
