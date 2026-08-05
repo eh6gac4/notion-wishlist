@@ -7,6 +7,7 @@ import {
   WishItemFields,
   type WishItemFieldsValues,
 } from "./WishItemFields";
+import { btnGhost, btnPrimary, cardCls } from "@/lib/styles";
 
 export type AddState = WishStatus | "default" | null;
 
@@ -66,10 +67,7 @@ export function AddItemForm({
   if (addState === null) return null;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-lg border border-[var(--notion-border-strong)] bg-white p-4 dark:bg-[#202020]"
-    >
+    <form onSubmit={handleSubmit} className={`p-4 ${cardCls}`}>
       <WishItemFields
         values={values}
         onChange={(next) => setValues((v) => ({ ...v, ...next }))}
@@ -84,14 +82,14 @@ export function AddItemForm({
             setValues(initialValues(DEFAULT_STATUS));
             onClose();
           }}
-          className="rounded px-3 py-1.5 text-[13px] text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-white/5"
+          className={`${btnGhost} px-3 py-1.5 text-sm`}
         >
           キャンセル
         </button>
         <button
           type="submit"
           disabled={pending || !values.name.trim()}
-          className="rounded bg-neutral-900 px-3.5 py-1.5 text-[13px] font-medium text-white shadow-sm hover:bg-neutral-700 disabled:opacity-50 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          className={`${btnPrimary} px-3.5 py-1.5 text-sm`}
         >
           {pending ? "追加中..." : "追加"}
         </button>

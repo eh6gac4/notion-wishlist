@@ -60,7 +60,7 @@ test.describe("PWA", () => {
     );
     await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
       "content",
-      "#0f172a"
+      "#101010"
     );
   });
 

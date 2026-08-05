@@ -19,7 +19,8 @@
     "cf:deploy": "dotenv -e .env.local -- npm run cf:deploy:ci",
     "cf:secret": "dotenv -e .env.local -- wrangler secret put",
     "cf:typegen": "dotenv -e .env.local -- wrangler types --env-interface CloudflareEnv ./worker-configuration.d.ts",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "splash": "node scripts/generate-splash.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.10.0",

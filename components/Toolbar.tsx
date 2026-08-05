@@ -2,6 +2,8 @@
 
 import type { WishStatus } from "@/lib/types";
 import { STATUSES } from "@/lib/types";
+import { btnPrimary, inputClsCompact, selectGhost } from "@/lib/styles";
+import { PixelIcon } from "./PixelIcon";
 
 export type StatusFilter = WishStatus | "all" | "active";
 export type SortKey =
@@ -33,7 +35,7 @@ export function Toolbar({
   onAddClick: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-[var(--notion-border)] pb-2 text-[12.5px] text-neutral-500 dark:text-neutral-400">
+    <div className="flex flex-wrap items-center gap-2 border-b-2 border-fc-ink pb-2 text-xs text-[var(--fc-muted)]">
       <select
         value={statusFilter}
         onChange={(e) => onStatusFilterChange(e.target.value as StatusFilter)}
@@ -65,7 +67,7 @@ export function Toolbar({
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         placeholder="検索"
-        className="h-7 w-44 rounded border border-transparent bg-transparent px-2 outline-none placeholder:text-neutral-400 hover:bg-neutral-100/70 focus:border-[var(--notion-border-strong)] focus:bg-white dark:hover:bg-white/5 dark:focus:bg-[#202020]"
+        className={`h-8 w-44 ${inputClsCompact}`}
       />
 
       <div className="ml-auto flex items-center gap-3">
@@ -78,14 +80,12 @@ export function Toolbar({
         <button
           type="button"
           onClick={onAddClick}
-          className="inline-flex h-7 items-center rounded bg-neutral-900 px-2.5 text-[13px] font-medium text-white transition hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+          className={`${btnPrimary} h-8 text-sm`}
         >
-          <span className="mr-1 text-base leading-none">+</span>新規
+          <PixelIcon name="plus" size={16} />
+          新規
         </button>
       </div>
     </div>
   );
 }
-
-const selectGhost =
-  "h-7 rounded border border-transparent bg-transparent px-1.5 text-neutral-700 outline-none hover:bg-neutral-100/70 focus:border-[var(--notion-border-strong)] focus:bg-white dark:text-neutral-200 dark:hover:bg-white/5 dark:focus:bg-[#202020]";

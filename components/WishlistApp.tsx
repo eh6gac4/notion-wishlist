@@ -13,6 +13,7 @@ import { Toolbar } from "./Toolbar";
 import type { StatusFilter, SortKey } from "./Toolbar";
 import { ListView } from "./ListView";
 import { AddItemForm, type AddState } from "./AddItemForm";
+import { alertCls, cardCls } from "@/lib/styles";
 
 export function WishlistApp() {
   const [items, setItems] = useState<WishItem[]>([]);
@@ -162,11 +163,7 @@ export function WishlistApp() {
         onAddClick={() => setAddState("default")}
       />
 
-      {error && (
-        <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-[13px] text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
-          {error}
-        </div>
-      )}
+      {error && <div className={alertCls}>{error}</div>}
 
       <AddItemForm
         addState={addState}
@@ -206,14 +203,14 @@ function priorityIndex(p: WishItem["priority"]): number {
 
 function SkeletonList() {
   return (
-    <div className="space-y-4 mt-6">
+    <div className="mt-6 space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="flex flex-col gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm animate-pulse">
-          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
-          <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mt-2"></div>
-          <div className="flex gap-2 mt-4">
-            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
-            <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+        <div key={i} className={`flex animate-pulse flex-col gap-2 ${cardCls}`}>
+          <div className="h-5 w-3/4 bg-[var(--fc-muted)]"></div>
+          <div className="mt-2 h-4 w-1/4 bg-[var(--fc-muted)]"></div>
+          <div className="mt-4 flex gap-2">
+            <div className="h-6 w-16 bg-[var(--fc-muted)]"></div>
+            <div className="h-6 w-16 bg-[var(--fc-muted)]"></div>
           </div>
         </div>
       ))}

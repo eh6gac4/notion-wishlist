@@ -1,0 +1,34 @@
+import GLYPHS from "@/lib/pixel-glyphs.json";
+
+export function PixelIcon({
+  name,
+  size = 16,
+  className,
+}: {
+  name: keyof typeof GLYPHS;
+  size?: 8 | 16 | 24 | 32;
+  className?: string;
+}) {
+  const rows = GLYPHS[name];
+  const n = rows.length;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${n} ${n}`}
+      shapeRendering="crispEdges"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      {rows.flatMap((row, y) =>
+        [...row].map((c, x) =>
+          c === "#" ? (
+            <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} />
+          ) : null
+        )
+      )}
+    </svg>
+  );
+}

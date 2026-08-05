@@ -11,6 +11,8 @@ import { STATUSES, TERMINAL_STATUSES } from "@/lib/types";
 import { PriorityText, StatusDot } from "./Pill";
 import { StatusMenu } from "./StatusMenu";
 import { ItemDetailDialog } from "./ItemDetailDialog";
+import { PixelIcon } from "./PixelIcon";
+import { rowHover } from "@/lib/styles";
 
 export function ListView({
   items,
@@ -121,13 +123,13 @@ function Section({
         <button
           type="button"
           onClick={() => setCollapsed((v) => !v)}
-          className="flex items-center gap-2 rounded px-1 py-0.5 text-[13px] font-medium hover:bg-neutral-100 dark:hover:bg-white/5"
+          className={`flex items-center gap-2 px-1 py-0.5 text-sm ${rowHover}`}
           aria-expanded={!collapsed}
         >
-          <Caret expanded={!collapsed} />
+          <PixelIcon name={collapsed ? "caretRight" : "caretDown"} size={8} />
           {title !== "未設定" && <StatusDot status={title} />}
           <span>{title}</span>
-          <span className="text-[12px] font-normal text-neutral-400 dark:text-neutral-500">
+          <span className="text-xs text-[var(--fc-muted)]">
             {items.length}
           </span>
         </button>
@@ -135,20 +137,18 @@ function Section({
           <button
             type="button"
             onClick={onAdd}
-            className="rounded p-1 text-neutral-400 opacity-0 transition group-hover:opacity-100 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
+            className={`p-1 text-[var(--fc-muted)] opacity-0 group-hover:opacity-100 ${rowHover}`}
             aria-label="このステータスに追加"
             title="このステータスに追加"
           >
-            <PlusIcon />
+            <PixelIcon name="plus" size={16} />
           </button>
         )}
       </div>
       {!collapsed && (
         <div>
           {items.length === 0 ? (
-            <p className="px-3 py-2 text-[12.5px] text-neutral-400 dark:text-neutral-500">
-              なし
-            </p>
+            <p className="px-3 py-2 text-xs text-[var(--fc-muted)]">なし</p>
           ) : (
             items.map((it) => (
               <Row
@@ -164,9 +164,10 @@ function Section({
             <button
               type="button"
               onClick={onAdd}
-              className="flex w-full items-center gap-1.5 rounded px-3 py-1.5 text-left text-[12.5px] text-neutral-400 hover:bg-neutral-100/60 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
+              className={`flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-xs text-[var(--fc-muted)] ${rowHover}`}
             >
-              <PlusIcon />新規
+              <PixelIcon name="plus" size={16} />
+              新規
             </button>
           )}
         </div>
@@ -190,8 +191,8 @@ function Row({
   const hasMeta =
     item.priority || item.purchaseDate || item.price !== null;
   return (
-    <div className="group border-b border-[var(--notion-border)]">
-      <div className="flex items-center gap-1 px-3 py-2 hover:bg-neutral-50/70 dark:hover:bg-white/[0.03]">
+    <div className="group border-b-2 border-fc-ink">
+      <div className={`flex items-center gap-1 px-3 py-2 ${rowHover}`}>
         <StatusMenu
           value={item.status}
           onChange={(next) => onPatch({ status: next })}
@@ -199,15 +200,13 @@ function Row({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded px-1.5 py-1 text-left hover:bg-neutral-100/60 dark:hover:bg-white/5"
+          className="flex min-w-0 flex-1 flex-col items-start gap-0.5 px-1.5 py-1 text-left"
           title={item.name}
           aria-label={`${item.name} の詳細を開く`}
         >
-          <span className="break-words text-[13.5px] text-neutral-900 dark:text-neutral-100">
-            {item.name}
-          </span>
+          <span className="break-words text-sm">{item.name}</span>
           {hasMeta && (
-            <div className="flex items-center gap-3 text-[12px] text-neutral-500 dark:text-neutral-400">
+            <div className="flex items-center gap-3 text-xs text-[var(--fc-muted)]">
               {item.priority && <PriorityText priority={item.priority} />}
               {item.purchaseDate && (
                 <span>{formatDate(item.purchaseDate)}</span>
@@ -225,11 +224,11 @@ function Row({
             href={item.url}
             target="_blank"
             rel="noreferrer"
-            className="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-white/5 dark:hover:text-neutral-200"
+            className={`p-1.5 text-[var(--fc-muted)] ${rowHover}`}
             aria-label="リンクを開く"
             title="リンクを開く"
           >
-            <ExternalLinkIcon />
+            <PixelIcon name="external" size={16} />
           </a>
         )}
       </div>
@@ -254,42 +253,9 @@ function Row({
 
 function Empty() {
   return (
-    <p className="border-t border-[var(--notion-border)] py-12 text-center text-[13px] text-neutral-400 dark:text-neutral-500">
+    <p className="border-t-2 border-fc-ink py-12 text-center text-sm text-[var(--fc-muted)]">
       該当する項目がありません
     </p>
-  );
-}
-
-function Caret({ expanded }: { expanded: boolean }) {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      className={`text-neutral-400 transition-transform ${
-        expanded ? "rotate-90" : ""
-      }`}
-      fill="currentColor"
-    >
-      <path d="M3 1.5L7 5L3 8.5V1.5Z" />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M7.25 7.25V2.75a.75.75 0 0 1 1.5 0v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5Z" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M9 2.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0V4.56l-4.72 4.72a.75.75 0 1 1-1.06-1.06L11.44 3.5H9.75A.75.75 0 0 1 9 2.75Z" />
-      <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v7.5C2 13.216 2.784 14 3.75 14h7.5A1.75 1.75 0 0 0 13 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-7.5a.25.25 0 0 1-.25-.25v-7.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5Z" />
-    </svg>
   );
 }
 
